@@ -151,7 +151,7 @@ class ProperVisualGame:
         target_rgb = cv2.cvtColor(self.target_image, cv2.COLOR_BGR2RGB)
         
         plt.imshow(target_rgb)
-        plt.title("🎯 TARGET IMAGE - Try to create a prompt that generates this!", 
+        plt.title("TARGET IMAGE - Try to create a prompt that generates this!", 
                  fontsize=16, fontweight='bold', pad=20)
         plt.axis('off')
         
@@ -161,9 +161,15 @@ class ProperVisualGame:
                    ha='center', fontsize=12, style='italic')
         
         plt.tight_layout()
+        
+        # Save the target display
+        target_display_file = "TARGET_IMAGE_TO_MATCH.png"
+        plt.savefig(target_display_file, dpi=150, bbox_inches='tight')
+        
         plt.show()
         
-        print("👆 This is your TARGET IMAGE!")
+        print("🎯 TARGET IMAGE saved as: TARGET_IMAGE_TO_MATCH.png")
+        print("👆 Check this file to see what you need to match!")
         print("🎯 Your mission: Create prompts that will generate a similar image")
         print("💡 Think about: colors, objects, style, lighting, composition")
     
