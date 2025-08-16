@@ -19,66 +19,285 @@ class MockStableDiffusionEngine:
         print(f"🎨 Mock Stable Diffusion Engine initialized (device: {device})")
         
     def __call__(self, prompt, num_inference_steps=20, guidance_scale=7.5):
-        """Generate a mock image based on prompt keywords"""
-        print(f"🔄 Generating image for: '{prompt}'")
+        """Generate a mock image based on prompt keywords - High definition output"""
+        print(f"🔄 Generating HD image for: '{prompt}'")
         
-        height, width = 512, 512
+        # Use high definition resolution to match target images
+        height, width = 1024, 1024
         image = np.zeros((height, width, 3), dtype=np.uint8)
         prompt_lower = prompt.lower()
         
-        # Sky/background based on keywords
-        if "sunset" in prompt_lower or "golden" in prompt_lower or "orange" in prompt_lower:
-            # Sunset gradient
-            for y in range(height // 2):
-                intensity = 1.0 - (y / (height // 2))
-                image[y, :, 0] = int(255 * intensity * 0.9)  # Red
-                image[y, :, 1] = int(255 * intensity * 0.7)  # Green
-                image[y, :, 2] = int(255 * intensity * 0.3)  # Blue
-        elif "blue" in prompt_lower and "sky" in prompt_lower:
-            # Blue sky
-            image[:height//2, :, 2] = 200
-            image[:height//2, :, 1] = 150
-            image[:height//2, :, 0] = 100
-        else:
-            # Default sky
-            image[:height//2, :] = [180, 180, 200]
+        # Child-friendly image generation based on keywords
         
-        # Ground/water
-        if "water" in prompt_lower or "ocean" in prompt_lower or "lake" in prompt_lower:
-            # Water
-            image[height//2:, :, 2] = 150
-            image[height//2:, :, 1] = 100
-            image[height//2:, :, 0] = 50
-        elif "desert" in prompt_lower or "sand" in prompt_lower:
-            # Desert
-            image[height//2:, :] = [139, 169, 255]  # Sandy color
-        else:
-            # Default ground
-            image[height//2:, :] = [60, 120, 60]  # Green ground
+        # House-related keywords
+        if "house" in prompt_lower or "home" in prompt_lower:
+            return self._generate_house_image(height, width, prompt_lower)
         
-        # Add objects
-        if "mountain" in prompt_lower:
-            # Mountain silhouette
-            for x in range(width):
-                mountain_height = int(height * 0.25 * (0.5 + 0.5 * np.sin(x * 0.01)))
-                y_start = height//2 - mountain_height
-                image[y_start:height//2, x] = [60, 60, 60]
+        # Cat-related keywords
+        elif "cat" in prompt_lower or "kitten" in prompt_lower:
+            return self._generate_cat_image(height, width, prompt_lower)
+        
+        # Rainbow-related keywords
+        elif "rainbow" in prompt_lower or "colorful" in prompt_lower:
+            return self._generate_rainbow_image(height, width, prompt_lower)
+        
+        # Tree-related keywords
+        elif "tree" in prompt_lower or "forest" in prompt_lower:
+            return self._generate_tree_image(height, width, prompt_lower)
+        
+        # Car-related keywords
+        elif "car" in prompt_lower or "vehicle" in prompt_lower:
+            return self._generate_car_image(height, width, prompt_lower)
+        
+        # Flower-related keywords
+        elif "flower" in prompt_lower or "garden" in prompt_lower:
+            return self._generate_flower_image(height, width, prompt_lower)
+        
+        # Butterfly-related keywords
+        elif "butterfly" in prompt_lower or "insect" in prompt_lower:
+            return self._generate_butterfly_image(height, width, prompt_lower)
+        
+        # Geometric shapes
+        elif any(shape in prompt_lower for shape in ["circle", "square", "triangle", "shape", "geometry"]):
+            return self._generate_shapes_image(height, width, prompt_lower)
+        
+        # Fallback - simple colorful background
+        else:
+            return self._generate_simple_image(height, width, prompt_lower)
+    
+    def _generate_house_image(self, height, width, prompt_lower):
+        """Generate a simple house based on keywords"""
+        image = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Sky
+        sky_color = [255, 200, 100] if "blue" in prompt_lower else [255, 200, 100]
+        image[:height//2, :] = sky_color
+        
+        # Ground
+        ground_color = [50, 200, 50] if "green" in prompt_lower else [50, 200, 50]
+        image[height//2:, :] = ground_color
+        
+        # House body
+        house_color = [0, 0, 255] if "red" in prompt_lower else [0, 0, 255]
+        house_top, house_bottom = int(height * 0.4), int(height * 0.7)
+        house_left, house_right = int(width * 0.3), int(width * 0.7)
+        image[house_top:house_bottom, house_left:house_right] = house_color
+        
+        # Roof
+        roof_peak = int(height * 0.25)
+        roof_points = np.array([
+            [house_left - 50, house_top],
+            [house_right + 50, house_top],
+            [width//2, roof_peak]
+        ], np.int32)
+        cv2.fillPoly(image, [roof_points], (150, 75, 0))
+        
+        # Door
+        door_width, door_height = int(width * 0.08), int(height * 0.15)
+        door_left = width//2 - door_width//2
+        door_top = house_bottom - door_height
+        image[door_top:house_bottom, door_left:door_left+door_width] = [0, 255, 255]
+        
+        # Windows
+        window_size = int(width * 0.06)
+        win_y = house_top + int(height * 0.08)
+        image[win_y:win_y+window_size, house_left+50:house_left+50+window_size] = [255, 255, 255]
+        image[win_y:win_y+window_size, house_right-50-window_size:house_right-50] = [255, 255, 255]
         
         if "sun" in prompt_lower:
-            # Add sun
-            sun_x = random.randint(width//4, 3*width//4)
-            sun_y = random.randint(50, height//3)
-            cv2.circle(image, (sun_x, sun_y), 40, (255, 255, 200), -1)
+            cv2.circle(image, (int(width * 0.8), int(height * 0.2)), 80, (0, 255, 255), -1)
         
-        if "moon" in prompt_lower:
-            # Add moon
-            moon_x = random.randint(width//4, 3*width//4)
-            moon_y = random.randint(50, height//3)
-            cv2.circle(image, (moon_x, moon_y), 35, (240, 240, 240), -1)
+        return image
+    
+    def _generate_cat_image(self, height, width, prompt_lower):
+        """Generate a simple cat based on keywords"""
+        image = np.zeros((height, width, 3), dtype=np.uint8)
         
-        # Add variation
-        noise = np.random.randint(-15, 15, image.shape)
-        image = np.clip(image.astype(np.int16) + noise, 0, 255).astype(np.uint8)
+        # Background
+        bg_color = [200, 150, 255] if "purple" in prompt_lower else [200, 150, 255]
+        image[:, :] = bg_color
+        
+        # Cat face
+        face_color = [0, 150, 255] if "orange" in prompt_lower else [0, 150, 255]
+        cv2.circle(image, (width//2, height//2), 200, face_color, -1)
+        
+        # Ears
+        ear_left = np.array([
+            [width//2 - 120, height//2 - 150],
+            [width//2 - 180, height//2 - 250],
+            [width//2 - 60, height//2 - 200]
+        ], np.int32)
+        cv2.fillPoly(image, [ear_left], face_color)
+        
+        ear_right = np.array([
+            [width//2 + 120, height//2 - 150],
+            [width//2 + 180, height//2 - 250],
+            [width//2 + 60, height//2 - 200]
+        ], np.int32)
+        cv2.fillPoly(image, [ear_right], face_color)
+        
+        # Eyes
+        cv2.circle(image, (width//2 - 60, height//2 - 40), 25, (0, 0, 0), -1)
+        cv2.circle(image, (width//2 + 60, height//2 - 40), 25, (0, 0, 0), -1)
+        
+        # Nose
+        nose = np.array([
+            [width//2, height//2 + 10],
+            [width//2 - 15, height//2 + 30],
+            [width//2 + 15, height//2 + 30]
+        ], np.int32)
+        cv2.fillPoly(image, [nose], (255, 0, 255))
+        
+        return image
+    
+    def _generate_rainbow_image(self, height, width, prompt_lower):
+        """Generate a rainbow based on keywords"""
+        image = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Sky background
+        image[:, :] = [255, 200, 150]
+        
+        # Rainbow
+        rainbow_colors = [
+            [0, 0, 255], [0, 165, 255], [0, 255, 255], [0, 255, 0],
+            [255, 0, 0], [255, 0, 127], [255, 0, 255]
+        ]
+        
+        center_x, center_y = width//2, int(height * 0.8)
+        for i, color in enumerate(rainbow_colors):
+            radius = 300 - i * 35
+            cv2.ellipse(image, (center_x, center_y), (radius, radius), 0, 0, 180, color, 30)
+        
+        # Clouds
+        cv2.circle(image, (100, int(height * 0.6)), 60, (255, 255, 255), -1)
+        cv2.circle(image, (width-100, int(height * 0.6)), 60, (255, 255, 255), -1)
+        
+        return image
+    
+    def _generate_tree_image(self, height, width, prompt_lower):
+        """Generate a tree based on keywords"""
+        image = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Sky and ground
+        image[:height//2, :] = [255, 255, 0]  # Cyan sky
+        image[height//2:, :] = [0, 200, 0]    # Green ground
+        
+        # Tree trunk
+        trunk_width = 80
+        trunk_height = 300
+        trunk_left = width//2 - trunk_width//2
+        trunk_bottom = int(height * 0.8)
+        trunk_top = trunk_bottom - trunk_height
+        image[trunk_top:trunk_bottom, trunk_left:trunk_left+trunk_width] = [0, 100, 139]
+        
+        # Tree crown
+        cv2.circle(image, (width//2, trunk_top - 100), 200, (0, 200, 0), -1)
+        
+        return image
+    
+    def _generate_car_image(self, height, width, prompt_lower):
+        """Generate a car based on keywords"""
+        image = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Sky and road
+        image[:height//2, :] = [255, 200, 100]
+        image[height//2:, :] = [100, 100, 100]
+        
+        # Car body
+        car_width, car_height = 400, 150
+        car_left = width//2 - car_width//2
+        car_bottom = int(height * 0.7)
+        car_top = car_bottom - car_height
+        image[car_top:car_bottom, car_left:car_left+car_width] = [0, 0, 255]
+        
+        # Wheels
+        wheel_y = car_bottom + 30
+        cv2.circle(image, (car_left + 80, wheel_y), 50, (0, 0, 0), -1)
+        cv2.circle(image, (car_left + car_width - 80, wheel_y), 50, (0, 0, 0), -1)
+        
+        return image
+    
+    def _generate_flower_image(self, height, width, prompt_lower):
+        """Generate a flower based on keywords"""
+        image = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Background
+        image[:, :] = [150, 255, 150]
+        
+        # Flower center
+        cv2.circle(image, (width//2, height//2), 50, (0, 255, 255), -1)
+        
+        # Petals
+        petal_positions = [
+            (width//2, height//2 - 120), (width//2 + 85, height//2 - 85),
+            (width//2 + 120, height//2), (width//2 + 85, height//2 + 85),
+            (width//2, height//2 + 120), (width//2 - 85, height//2 + 85),
+            (width//2 - 120, height//2), (width//2 - 85, height//2 - 85)
+        ]
+        
+        for pos in petal_positions:
+            cv2.circle(image, pos, 60, (255, 0, 255), -1)
+        
+        return image
+    
+    def _generate_butterfly_image(self, height, width, prompt_lower):
+        """Generate a butterfly based on keywords"""
+        image = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Background
+        image[:, :] = [150, 255, 255]
+        
+        # Body
+        body_width = 15
+        body_height = 250
+        body_left = width//2 - body_width//2
+        body_top = height//2 - body_height//2
+        image[body_top:body_top+body_height, body_left:body_left+body_width] = [0, 0, 0]
+        
+        # Wings
+        cv2.circle(image, (width//2 - 80, height//2 - 60), 80, (255, 0, 255), -1)
+        cv2.circle(image, (width//2 + 80, height//2 - 60), 80, (0, 255, 255), -1)
+        cv2.circle(image, (width//2 - 60, height//2 + 40), 60, (255, 150, 0), -1)
+        cv2.circle(image, (width//2 + 60, height//2 + 40), 60, (0, 150, 255), -1)
+        
+        return image
+    
+    def _generate_shapes_image(self, height, width, prompt_lower):
+        """Generate geometric shapes based on keywords"""
+        image = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Background
+        image[:, :] = [200, 200, 200]
+        
+        # Circle
+        cv2.circle(image, (width//4, height//4), 100, (0, 0, 255), -1)
+        
+        # Square
+        square_size = 200
+        square_left = 3*width//4 - square_size//2
+        square_top = height//4 - square_size//2
+        image[square_top:square_top+square_size, square_left:square_left+square_size] = [255, 0, 0]
+        
+        # Triangle
+        triangle = np.array([
+            [width//4, 3*height//4 + 100],
+            [width//4 - 100, 3*height//4 - 100],
+            [width//4 + 100, 3*height//4 - 100]
+        ], np.int32)
+        cv2.fillPoly(image, [triangle], (0, 255, 0))
+        
+        return image
+    
+    def _generate_simple_image(self, height, width, prompt_lower):
+        """Generate a simple colorful image as fallback"""
+        image = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Simple gradient background
+        for y in range(height):
+            intensity = y / height
+            image[y, :, 0] = int(100 + 155 * intensity)
+            image[y, :, 1] = int(150 + 105 * intensity)
+            image[y, :, 2] = int(200 + 55 * intensity)
         
         return image
 
@@ -115,31 +334,369 @@ class ProperVisualGame:
         print("✅ Game initialized!")
     
     def create_challenge_image(self):
-        """Create a challenging target image for students to match"""
-        height, width = 512, 512
+        """Create a challenging target image for students to match - High definition, high contrast, child-friendly"""
+        # Upgrade to high definition resolution
+        height, width = 1024, 1024
+        
+        # Choose a random child-friendly image type
+        image_types = [
+            'simple_house', 'rainbow', 'simple_cat', 'colorful_tree', 
+            'geometric_shapes', 'simple_car', 'flower', 'butterfly'
+        ]
+        image_type = random.choice(image_types)
+        
+        if image_type == 'simple_house':
+            return self._create_simple_house(height, width)
+        elif image_type == 'rainbow':
+            return self._create_rainbow(height, width)
+        elif image_type == 'simple_cat':
+            return self._create_simple_cat(height, width)
+        elif image_type == 'colorful_tree':
+            return self._create_colorful_tree(height, width)
+        elif image_type == 'geometric_shapes':
+            return self._create_geometric_shapes(height, width)
+        elif image_type == 'simple_car':
+            return self._create_simple_car(height, width)
+        elif image_type == 'flower':
+            return self._create_flower(height, width)
+        else:  # butterfly
+            return self._create_butterfly(height, width)
+    
+    def _create_simple_house(self, height, width):
+        """Create a simple, high-contrast house perfect for children"""
         target = np.zeros((height, width, 3), dtype=np.uint8)
         
-        # Create a sunset over water with mountains
-        # Sunset sky gradient
-        for y in range(height // 2):
-            intensity = 1.0 - (y / (height // 2))
-            target[y, :, 0] = int(255 * intensity * 0.9)  # Red
-            target[y, :, 1] = int(255 * intensity * 0.7)  # Green
-            target[y, :, 2] = int(255 * intensity * 0.3)  # Blue
+        # Sky - bright blue
+        target[:height//2, :] = [255, 200, 100]  # Light blue sky
         
-        # Water reflection
-        target[height//2:, :, 2] = 120
-        target[height//2:, :, 1] = 80
-        target[height//2:, :, 0] = 40
+        # Ground - bright green
+        target[height//2:, :] = [50, 200, 50]  # Bright green grass
         
-        # Add sun
-        cv2.circle(target, (400, 120), 45, (255, 255, 200), -1)
+        # House base - bright red
+        house_bottom = int(height * 0.7)
+        house_top = int(height * 0.4)
+        house_left = int(width * 0.3)
+        house_right = int(width * 0.7)
+        target[house_top:house_bottom, house_left:house_right] = [0, 0, 255]  # Red house
         
-        # Add mountain silhouette
-        for x in range(width):
-            mountain_height = int(height * 0.2 * (0.5 + 0.5 * np.sin(x * 0.008)))
-            y_start = height//2 - mountain_height
-            target[y_start:height//2, x] = [50, 50, 50]
+        # Roof - dark blue triangle
+        roof_peak = int(height * 0.25)
+        roof_points = np.array([
+            [house_left - 50, house_top],
+            [house_right + 50, house_top],
+            [width//2, roof_peak]
+        ], np.int32)
+        cv2.fillPoly(target, [roof_points], (150, 75, 0))  # Dark blue roof
+        
+        # Door - yellow rectangle
+        door_width = int(width * 0.08)
+        door_height = int(height * 0.15)
+        door_left = width//2 - door_width//2
+        door_right = width//2 + door_width//2
+        door_top = house_bottom - door_height
+        target[door_top:house_bottom, door_left:door_right] = [0, 255, 255]  # Yellow door
+        
+        # Windows - white squares
+        window_size = int(width * 0.06)
+        # Left window
+        win_left_x = house_left + int(width * 0.05)
+        win_left_y = house_top + int(height * 0.08)
+        target[win_left_y:win_left_y+window_size, win_left_x:win_left_x+window_size] = [255, 255, 255]
+        
+        # Right window
+        win_right_x = house_right - int(width * 0.05) - window_size
+        target[win_left_y:win_left_y+window_size, win_right_x:win_right_x+window_size] = [255, 255, 255]
+        
+        # Sun - bright yellow circle
+        cv2.circle(target, (int(width * 0.8), int(height * 0.2)), 80, (0, 255, 255), -1)
+        
+        return target
+    
+    def _create_rainbow(self, height, width):
+        """Create a bright, colorful rainbow"""
+        target = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Sky - light blue
+        target[:, :] = [255, 200, 150]  # Light blue background
+        
+        # Rainbow colors (BGR format)
+        rainbow_colors = [
+            [0, 0, 255],      # Red
+            [0, 165, 255],    # Orange  
+            [0, 255, 255],    # Yellow
+            [0, 255, 0],      # Green
+            [255, 0, 0],      # Blue
+            [255, 0, 127],    # Indigo
+            [255, 0, 255]     # Violet
+        ]
+        
+        center_x, center_y = width//2, int(height * 0.8)
+        
+        # Draw rainbow arcs
+        for i, color in enumerate(rainbow_colors):
+            radius = 300 - i * 35
+            thickness = 30
+            cv2.ellipse(target, (center_x, center_y), (radius, radius), 
+                       0, 0, 180, color, thickness)
+        
+        # Clouds at the ends
+        cv2.circle(target, (100, int(height * 0.6)), 60, (255, 255, 255), -1)
+        cv2.circle(target, (120, int(height * 0.6)), 50, (255, 255, 255), -1)
+        cv2.circle(target, (80, int(height * 0.6)), 50, (255, 255, 255), -1)
+        
+        cv2.circle(target, (width-100, int(height * 0.6)), 60, (255, 255, 255), -1)
+        cv2.circle(target, (width-120, int(height * 0.6)), 50, (255, 255, 255), -1)
+        cv2.circle(target, (width-80, int(height * 0.6)), 50, (255, 255, 255), -1)
+        
+        return target
+    
+    def _create_simple_cat(self, height, width):
+        """Create a simple, cute cat face"""
+        target = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Background - light purple
+        target[:, :] = [200, 150, 255]
+        
+        # Cat face - orange circle
+        face_center = (width//2, height//2)
+        face_radius = 200
+        cv2.circle(target, face_center, face_radius, (0, 150, 255), -1)  # Orange face
+        
+        # Ears - orange triangles
+        ear_left = np.array([
+            [width//2 - 120, height//2 - 150],
+            [width//2 - 180, height//2 - 250],
+            [width//2 - 60, height//2 - 200]
+        ], np.int32)
+        cv2.fillPoly(target, [ear_left], (0, 150, 255))
+        
+        ear_right = np.array([
+            [width//2 + 120, height//2 - 150],
+            [width//2 + 180, height//2 - 250],
+            [width//2 + 60, height//2 - 200]
+        ], np.int32)
+        cv2.fillPoly(target, [ear_right], (0, 150, 255))
+        
+        # Eyes - black circles
+        cv2.circle(target, (width//2 - 60, height//2 - 40), 25, (0, 0, 0), -1)
+        cv2.circle(target, (width//2 + 60, height//2 - 40), 25, (0, 0, 0), -1)
+        
+        # Nose - pink triangle
+        nose = np.array([
+            [width//2, height//2 + 10],
+            [width//2 - 15, height//2 + 30],
+            [width//2 + 15, height//2 + 30]
+        ], np.int32)
+        cv2.fillPoly(target, [nose], (255, 0, 255))
+        
+        # Mouth - black curve
+        cv2.ellipse(target, (width//2, height//2 + 50), (40, 20), 0, 0, 180, (0, 0, 0), 3)
+        
+        return target
+    
+    def _create_colorful_tree(self, height, width):
+        """Create a bright, colorful tree"""
+        target = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Sky - bright cyan
+        target[:height//2, :] = [255, 255, 0]  # Cyan sky
+        
+        # Ground - green
+        target[height//2:, :] = [0, 200, 0]
+        
+        # Tree trunk - brown rectangle
+        trunk_width = 80
+        trunk_height = 300
+        trunk_left = width//2 - trunk_width//2
+        trunk_right = width//2 + trunk_width//2
+        trunk_bottom = int(height * 0.8)
+        trunk_top = trunk_bottom - trunk_height
+        target[trunk_top:trunk_bottom, trunk_left:trunk_right] = [0, 100, 139]  # Brown
+        
+        # Tree crown - large green circle
+        crown_center = (width//2, trunk_top - 100)
+        crown_radius = 200
+        cv2.circle(target, crown_center, crown_radius, (0, 200, 0), -1)  # Green crown
+        
+        # Colorful fruits/decorations on tree
+        fruit_positions = [
+            (width//2 - 80, trunk_top - 50),
+            (width//2 + 80, trunk_top - 50),
+            (width//2, trunk_top - 150),
+            (width//2 - 120, trunk_top - 120),
+            (width//2 + 120, trunk_top - 120)
+        ]
+        
+        fruit_colors = [(0, 0, 255), (0, 255, 255), (255, 0, 255), (0, 255, 0), (255, 255, 0)]
+        
+        for pos, color in zip(fruit_positions, fruit_colors):
+            cv2.circle(target, pos, 25, color, -1)
+        
+        return target
+    
+    def _create_geometric_shapes(self, height, width):
+        """Create simple geometric shapes for learning"""
+        target = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Background - light gray
+        target[:, :] = [200, 200, 200]
+        
+        # Circle - red
+        cv2.circle(target, (width//4, height//4), 100, (0, 0, 255), -1)
+        
+        # Square - blue
+        square_size = 200
+        square_left = 3*width//4 - square_size//2
+        square_top = height//4 - square_size//2
+        target[square_top:square_top+square_size, square_left:square_left+square_size] = [255, 0, 0]
+        
+        # Triangle - green
+        triangle = np.array([
+            [width//4, 3*height//4 + 100],
+            [width//4 - 100, 3*height//4 - 100],
+            [width//4 + 100, 3*height//4 - 100]
+        ], np.int32)
+        cv2.fillPoly(target, [triangle], (0, 255, 0))
+        
+        # Star - yellow
+        star_center = (3*width//4, 3*height//4)
+        star_points = []
+        for i in range(10):
+            angle = i * np.pi / 5
+            if i % 2 == 0:
+                radius = 100
+            else:
+                radius = 50
+            x = int(star_center[0] + radius * np.cos(angle - np.pi/2))
+            y = int(star_center[1] + radius * np.sin(angle - np.pi/2))
+            star_points.append([x, y])
+        
+        star_points = np.array(star_points, np.int32)
+        cv2.fillPoly(target, [star_points], (0, 255, 255))
+        
+        return target
+    
+    def _create_simple_car(self, height, width):
+        """Create a simple, colorful car"""
+        target = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Background - light blue sky
+        target[:height//2, :] = [255, 200, 100]
+        
+        # Ground - gray road
+        target[height//2:, :] = [100, 100, 100]
+        
+        # Car body - bright red rectangle
+        car_width = 400
+        car_height = 150
+        car_left = width//2 - car_width//2
+        car_right = width//2 + car_width//2
+        car_bottom = int(height * 0.7)
+        car_top = car_bottom - car_height
+        target[car_top:car_bottom, car_left:car_right] = [0, 0, 255]  # Red car
+        
+        # Car roof - smaller rectangle
+        roof_width = 250
+        roof_height = 100
+        roof_left = width//2 - roof_width//2
+        roof_right = width//2 + roof_width//2
+        roof_top = car_top - roof_height
+        target[roof_top:car_top, roof_left:roof_right] = [0, 0, 200]  # Darker red roof
+        
+        # Wheels - black circles
+        wheel_radius = 50
+        wheel_y = car_bottom + 30
+        cv2.circle(target, (car_left + 80, wheel_y), wheel_radius, (0, 0, 0), -1)
+        cv2.circle(target, (car_right - 80, wheel_y), wheel_radius, (0, 0, 0), -1)
+        
+        # Windows - light blue
+        window_margin = 20
+        target[roof_top + window_margin:car_top - window_margin, 
+               roof_left + window_margin:roof_right - window_margin] = [255, 255, 200]
+        
+        # Headlights - yellow circles
+        cv2.circle(target, (car_right - 20, car_top + car_height//2), 20, (0, 255, 255), -1)
+        
+        return target
+    
+    def _create_flower(self, height, width):
+        """Create a simple, colorful flower"""
+        target = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Background - light green
+        target[:, :] = [150, 255, 150]
+        
+        # Flower center - yellow circle
+        center = (width//2, height//2)
+        cv2.circle(target, center, 50, (0, 255, 255), -1)
+        
+        # Petals - pink/red circles around center
+        petal_positions = [
+            (width//2, height//2 - 120),      # top
+            (width//2 + 85, height//2 - 85),  # top-right
+            (width//2 + 120, height//2),      # right
+            (width//2 + 85, height//2 + 85),  # bottom-right
+            (width//2, height//2 + 120),      # bottom
+            (width//2 - 85, height//2 + 85),  # bottom-left
+            (width//2 - 120, height//2),      # left
+            (width//2 - 85, height//2 - 85)   # top-left
+        ]
+        
+        for pos in petal_positions:
+            cv2.circle(target, pos, 60, (255, 0, 255), -1)  # Pink petals
+        
+        # Stem - green rectangle
+        stem_width = 20
+        stem_left = width//2 - stem_width//2
+        stem_right = width//2 + stem_width//2
+        stem_top = height//2 + 120
+        stem_bottom = int(height * 0.9)
+        target[stem_top:stem_bottom, stem_left:stem_right] = [0, 150, 0]
+        
+        # Leaves - green ovals
+        cv2.ellipse(target, (width//2 - 50, height//2 + 200), (30, 60), -30, 0, 360, (0, 200, 0), -1)
+        cv2.ellipse(target, (width//2 + 50, height//2 + 200), (30, 60), 30, 0, 360, (0, 200, 0), -1)
+        
+        return target
+    
+    def _create_butterfly(self, height, width):
+        """Create a colorful butterfly"""
+        target = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Background - light yellow
+        target[:, :] = [150, 255, 255]
+        
+        # Body - black rectangle
+        body_width = 15
+        body_height = 250
+        body_left = width//2 - body_width//2
+        body_right = width//2 + body_width//2
+        body_top = height//2 - body_height//2
+        body_bottom = height//2 + body_height//2
+        target[body_top:body_bottom, body_left:body_right] = [0, 0, 0]
+        
+        # Upper wings - large colorful circles
+        cv2.circle(target, (width//2 - 80, height//2 - 60), 80, (255, 0, 255), -1)  # Left upper wing - magenta
+        cv2.circle(target, (width//2 + 80, height//2 - 60), 80, (0, 255, 255), -1)  # Right upper wing - yellow
+        
+        # Lower wings - smaller colorful circles  
+        cv2.circle(target, (width//2 - 60, height//2 + 40), 60, (255, 150, 0), -1)  # Left lower wing - orange
+        cv2.circle(target, (width//2 + 60, height//2 + 40), 60, (0, 150, 255), -1)  # Right lower wing - light blue
+        
+        # Wing patterns - small colored dots
+        # Left upper wing dots
+        cv2.circle(target, (width//2 - 100, height//2 - 80), 15, (0, 0, 255), -1)  # Red dot
+        cv2.circle(target, (width//2 - 60, height//2 - 40), 15, (0, 255, 0), -1)   # Green dot
+        
+        # Right upper wing dots
+        cv2.circle(target, (width//2 + 100, height//2 - 80), 15, (255, 0, 0), -1)  # Blue dot
+        cv2.circle(target, (width//2 + 60, height//2 - 40), 15, (0, 255, 0), -1)   # Green dot
+        
+        # Antennae - black lines with small circles at ends
+        cv2.line(target, (width//2 - 5, body_top), (width//2 - 30, body_top - 40), (0, 0, 0), 3)
+        cv2.line(target, (width//2 + 5, body_top), (width//2 + 30, body_top - 40), (0, 0, 0), 3)
+        cv2.circle(target, (width//2 - 30, body_top - 40), 8, (0, 0, 0), -1)
+        cv2.circle(target, (width//2 + 30, body_top - 40), 8, (0, 0, 0), -1)
         
         return target
     

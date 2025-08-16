@@ -28,7 +28,7 @@ class MockStableDiffusionEngine:
         print(f"🔄 Generating image for: '{prompt}'")
         
         # Create base image
-        height, width = 512, 512
+        height, width = 1024, 1024
         image = np.zeros((height, width, 3), dtype=np.uint8)
         
         prompt_lower = prompt.lower()
@@ -137,8 +137,8 @@ class VisualPromptGame:
         print("✅ Visual game initialized!")
     
     def create_target_image(self):
-        """Create a default target image for demonstration"""
-        height, width = 512, 512
+        """Create a default target image for demonstration - High definition, child-friendly"""
+        height, width = 1024, 1024
         target = np.zeros((height, width, 3), dtype=np.uint8)
         
         # Create a sunset scene

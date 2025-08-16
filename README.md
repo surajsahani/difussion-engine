@@ -1,6 +1,22 @@
 # Reverse Prompt Engineering Game 🎯
 
-An educational game where students are given a target image and must craft prompts until their generated image matches the original. Perfect for teaching prompt engineering skills!
+An educational game where students are given a target image and must craft prompts until their generated image matches the original. Perfect for teaching prompt engineering skills to students of all ages!
+
+## ✨ New Features - Child-Friendly HD Images
+
+- **High Definition Images**: Upgraded to 1024x1024 resolution (vs previous 512x512)
+- **High Contrast Design**: Clear, distinct colors perfect for young learners
+- **Child-Friendly Content**: Simple shapes, animals, and objects suitable for 5-year-olds
+- **Educational Focus**: Age-appropriate images that make learning fun and engaging
+
+### 🎨 Available Image Types
+- **Simple Houses**: Colorful houses with doors, windows, and roofs
+- **Rainbows**: Bright, colorful rainbows with clouds
+- **Cute Animals**: Simple cats, dogs, and other friendly animals
+- **Basic Shapes**: Circles, squares, triangles, and stars
+- **Nature**: Trees, flowers, and butterflies
+- **Vehicles**: Simple cars and transportation
+- **Educational Objects**: Perfect for prompt engineering practice
 
 ## Features
 
@@ -84,10 +100,18 @@ The game uses a combined similarity score (0.0 to 1.0):
 ## For Educators
 
 This tool is perfect for:
-- AI/ML courses covering generative models
-- Digital art and design classes
-- Creative writing workshops
-- Computer vision education
-- Prompt engineering training
+- **Early Childhood Education**: Age-appropriate content for 5+ year olds
+- **AI/ML courses**: Covering generative models with engaging visuals
+- **Digital art and design classes**: High contrast, colorful examples
+- **Creative writing workshops**: Visual inspiration for storytelling
+- **Computer vision education**: Understanding image generation
+- **Prompt engineering training**: Hands-on learning experience
+
+### Educational Benefits for Young Learners
+- **Visual Learning**: High contrast, clear images aid comprehension
+- **Simple Concepts**: Age-appropriate content builds confidence
+- **Interactive Learning**: Immediate feedback encourages experimentation
+- **Creative Expression**: Encourages descriptive language development
+- **Technical Skills**: Introduction to AI concepts in a fun way
 
 Students will develop both technical and creative skills while having fun with the challenge!# difussion-engine
