@@ -1,0 +1,36 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Generated images (except examples)
+*.png
+*.jpg
+!example*.png
+!example*.jpg
+
+# Session files
+*_session.json
+game_session.json
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Virtual environments
+venv/
+env/
+.env
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
