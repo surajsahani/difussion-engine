@@ -1,0 +1,8 @@
+{
+  "name": "AI Prompt Engineering Game - Student Edition",
+  "version": "1.0.0",
+  "created": "2025-08-16T19:19:43.601671",
+  "description": "Educational game for learning AI prompt engineering",
+  "requirements": "Python 3.8+, Internet connection",
+  "students_supported": "Unlimited (uses free Pollinations.ai API)"
+}
