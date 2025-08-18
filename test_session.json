@@ -1,0 +1,68 @@
+{
+  "test_session": true,
+  "attempts": [
+    {
+      "attempt": 1,
+      "prompt": "a red apple",
+      "score": 0.505726055602632,
+      "detailed_scores": {
+        "combined": 0.505726055602632,
+        "structural": 0.2979678264119743,
+        "histogram": 0.6579239368469607,
+        "features": 0.6168467514952899
+      },
+      "timestamp": "2025-08-18T14:24:38.521588"
+    },
+    {
+      "attempt": 2,
+      "prompt": "blue ocean waves",
+      "score": 0.644396847896646,
+      "detailed_scores": {
+        "combined": 0.644396847896646,
+        "structural": 0.5540116903746137,
+        "histogram": 0.7425891422242556,
+        "features": 0.6287825742854908
+      },
+      "timestamp": "2025-08-18T14:24:38.522096"
+    },
+    {
+      "attempt": 3,
+      "prompt": "green forest landscape",
+      "score": 0.6166591799538222,
+      "detailed_scores": {
+        "combined": 0.6166591799538222,
+        "structural": 0.6315182360128472,
+        "histogram": 0.7947491047711588,
+        "features": 0.2307612182010992
+      },
+      "timestamp": "2025-08-18T14:24:38.522499"
+    },
+    {
+      "attempt": 4,
+      "prompt": "orange sunset over mountains",
+      "score": 0.7545634239197635,
+      "detailed_scores": {
+        "combined": 0.7545634239197635,
+        "structural": 0.8534825926937573,
+        "histogram": 0.806198699745317,
+        "features": 0.4534545347206691
+      },
+      "timestamp": "2025-08-18T14:24:38.522846"
+    },
+    {
+      "attempt": 5,
+      "prompt": "a beautiful orange and blue abstract painting",
+      "score": 0.5221453826391411,
+      "detailed_scores": {
+        "combined": 0.5221453826391411,
+        "structural": 0.5016544497575791,
+        "histogram": 0.7402952715272215,
+        "features": 0.12682747062610383
+      },
+      "timestamp": "2025-08-18T14:24:38.523221"
+    }
+  ],
+  "best_score": 0.7545634239197635,
+  "best_prompt": "orange sunset over mountains",
+  "total_attempts": 5
+}
