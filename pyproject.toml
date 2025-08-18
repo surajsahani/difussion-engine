@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-prompt-game"
+version = "1.0.0"
+description = "AI-powered reverse prompt engineering educational game"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+keywords = ["ai", "education", "prompt-engineering", "machine-learning", "game", "cli"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "Topic :: Education :: Computer Aided Instruction (CAI)",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "opencv-python>=4.5.0",
+    "matplotlib>=3.5.0",
+    "numpy>=1.21.0",
+    "requests>=2.28.0",
+    "pillow>=9.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "black>=22.0",
+    "flake8>=4.0",
+]
+huggingface = [
+    "diffusers>=0.20.0",
+    "transformers>=4.20.0",
+    "torch>=1.12.0",
+]
+replicate = [
+    "replicate>=0.15.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/ai-prompt-game"
+Repository = "https://github.com/yourusername/ai-prompt-game"
+Issues = "https://github.com/yourusername/ai-prompt-game/issues"
+
+[project.scripts]
+ai-prompt-game = "ai_prompt_game.cli:main"
+prompt-game = "ai_prompt_game.cli:main"
+ai-game = "ai_prompt_game.cli:main"

@@ -1,3 +1,49 @@
+Metadata-Version: 2.4
+Name: ai-prompt-game
+Version: 1.0.0
+Summary: AI-powered reverse prompt engineering educational game
+Home-page: https://github.com/yourusername/ai-prompt-game
+Author: Your Name
+Author-email: Your Name <your.email@example.com>
+License: MIT
+Project-URL: Homepage, https://github.com/yourusername/ai-prompt-game
+Project-URL: Repository, https://github.com/yourusername/ai-prompt-game
+Project-URL: Issues, https://github.com/yourusername/ai-prompt-game/issues
+Keywords: ai,education,prompt-engineering,machine-learning,game,cli
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Education
+Classifier: Topic :: Education :: Computer Aided Instruction (CAI)
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: opencv-python>=4.5.0
+Requires-Dist: matplotlib>=3.5.0
+Requires-Dist: numpy>=1.21.0
+Requires-Dist: requests>=2.28.0
+Requires-Dist: pillow>=9.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=6.0; extra == "dev"
+Requires-Dist: black>=22.0; extra == "dev"
+Requires-Dist: flake8>=4.0; extra == "dev"
+Provides-Extra: huggingface
+Requires-Dist: diffusers>=0.20.0; extra == "huggingface"
+Requires-Dist: transformers>=4.20.0; extra == "huggingface"
+Requires-Dist: torch>=1.12.0; extra == "huggingface"
+Provides-Extra: replicate
+Requires-Dist: replicate>=0.15.0; extra == "replicate"
+Dynamic: author
+Dynamic: home-page
+Dynamic: license-file
+Dynamic: requires-python
+
 # 🎯 AI Prompt Engineering Game
 
 [![PyPI version](https://badge.fury.io/py/ai-prompt-game.svg)](https://badge.fury.io/py/ai-prompt-game)

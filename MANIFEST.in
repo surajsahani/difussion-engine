@@ -1,0 +1,7 @@
+include README.md
+include LICENSE
+include requirements.txt
+recursive-include ai_prompt_game *.py
+recursive-include ai_prompt_game/data *.json
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
