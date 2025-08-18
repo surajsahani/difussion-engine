@@ -3,10 +3,13 @@
 [![PyPI version](https://badge.fury.io/py/ai-prompt-game.svg)](https://badge.fury.io/py/ai-prompt-game)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Cross-Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)](https://github.com/yourusername/ai-prompt-game)
 
 **Learn AI prompt engineering through reverse engineering!** 🎮
 
 An educational CLI game where students see a target image and must craft prompts to recreate it using AI image generation. Perfect for learning prompt engineering, visual analysis, and AI communication skills.
+
+**✅ Cross-Platform Compatible**: Works seamlessly on Windows, macOS, and Linux (Ubuntu/Debian)
 
 ## 🚀 Quick Start
 
@@ -55,6 +58,7 @@ That's it! The game will guide you through setup and start your first challenge.
 - **🎓 Educational Feedback**: Learn what makes prompts effective
 - **📈 Progress Tracking**: See your improvement over time
 - **🌍 Works Offline**: After setup, only AI generation needs internet
+- **🖥️ Cross-Platform**: Native support for Windows, macOS, and Linux
 
 ## 🛠️ Installation Options
 
@@ -81,6 +85,41 @@ pip install ai-prompt-game[huggingface]
 # For Replicate API
 pip install ai-prompt-game[replicate]
 ```
+
+## 🖥️ Platform-Specific Setup
+
+### Windows
+```cmd
+# Install via pip (works in Command Prompt or PowerShell)
+pip install ai-prompt-game
+ai-prompt-game
+
+# If you encounter OpenCV issues:
+pip install opencv-python-headless
+```
+
+### Ubuntu/Linux
+```bash
+# Standard installation
+pip install ai-prompt-game
+
+# If you need system OpenCV dependencies:
+sudo apt-get update
+sudo apt-get install python3-opencv libopencv-dev
+
+# Then install the game
+pip install ai-prompt-game
+ai-prompt-game
+```
+
+### macOS
+```bash
+# Standard installation works out of the box
+pip install ai-prompt-game
+ai-prompt-game
+```
+
+**Note**: All platforms use the same commands once installed. The game automatically detects your operating system and adapts accordingly.
 
 ## 🎯 Game Commands
 
