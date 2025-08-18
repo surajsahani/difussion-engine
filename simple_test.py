@@ -8,6 +8,17 @@ import sys
 import json
 from datetime import datetime
 
+# Import voice feedback
+try:
+    from voice_feedback import speak_feedback, speak_score
+    VOICE_AVAILABLE = True
+except ImportError:
+    VOICE_AVAILABLE = False
+    def speak_feedback(*args, **kwargs):
+        pass
+    def speak_score(*args, **kwargs):
+        pass
+
 # Mock the heavy dependencies for testing
 class MockStableDiffusionEngine:
     """Mock engine that generates random colored images for testing"""
@@ -118,9 +129,18 @@ sys.modules['skimage.metrics'] = type('MockModule', (), {'structural_similarity'
 
 # Now create a simplified game class
 class SimplePromptGame:
-    def __init__(self, target_image_path="mock_target.jpg"):
+    def __init__(self, target_image_path="mock_target.jpg", voice_feedback_enabled=True):
         print(f"🎯 Initializing Simple Prompt Game...")
         print(f"📁 Target image: {target_image_path}")
+        
+        # Voice feedback setting
+        self.voice_feedback_enabled = voice_feedback_enabled and VOICE_AVAILABLE
+        if self.voice_feedback_enabled:
+            print("🔊 Voice feedback enabled")
+        elif VOICE_AVAILABLE:
+            print("🔇 Voice feedback disabled by user")
+        else:
+            print("⚠️  Voice feedback not available (pyttsx3 or espeak missing)")
         
         # Mock engine
         self.engine = MockStableDiffusionEngine(None)
@@ -210,12 +230,23 @@ class SimplePromptGame:
         feedback = self.get_feedback(combined_score)
         print(f"💬 {feedback}")
         
+        # Voice feedback
+        if self.voice_feedback_enabled:
+            speak_score(combined_score, is_best, enabled=True)
+            speak_feedback(feedback, enabled=True)
+        
         return {
             'score': combined_score,
             'detailed_scores': scores,
             'feedback': feedback,
             'is_best': is_best
         }
+    
+    def set_voice_feedback(self, enabled: bool):
+        """Enable or disable voice feedback"""
+        self.voice_feedback_enabled = enabled and VOICE_AVAILABLE
+        status = "enabled" if self.voice_feedback_enabled else "disabled"
+        print(f"🔊 Voice feedback {status}")
     
     def show_progress(self):
         """Display current game progress"""
