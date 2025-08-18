@@ -13,6 +13,17 @@ import json
 import os
 import random
 
+# Import voice feedback
+try:
+    from voice_feedback import speak_feedback, speak_score
+    VOICE_AVAILABLE = True
+except ImportError:
+    VOICE_AVAILABLE = False
+    def speak_feedback(*args, **kwargs):
+        pass
+    def speak_score(*args, **kwargs):
+        pass
+
 class MockStableDiffusionEngine:
     """
     Mock Stable Diffusion Engine that creates realistic-looking images
@@ -109,8 +120,17 @@ class MockStableDiffusionEngine:
 class VisualPromptGame:
     """Visual version of the prompt guessing game with image display"""
     
-    def __init__(self, target_image_path=None):
+    def __init__(self, target_image_path=None, voice_feedback_enabled=True):
         print("🎯 Initializing Visual Prompt Game...")
+        
+        # Voice feedback setting
+        self.voice_feedback_enabled = voice_feedback_enabled and VOICE_AVAILABLE
+        if self.voice_feedback_enabled:
+            print("🔊 Voice feedback enabled")
+        elif VOICE_AVAILABLE:
+            print("🔇 Voice feedback disabled by user")
+        else:
+            print("⚠️  Voice feedback not available (pyttsx3 or espeak missing)")
         
         # Initialize mock engine (replace with real engine when ready)
         self.engine = MockStableDiffusionEngine()
@@ -242,6 +262,12 @@ class VisualPromptGame:
         else:
             return "💡 Keep trying! Think about the main subject, style, and details."
     
+    def set_voice_feedback(self, enabled: bool):
+        """Enable or disable voice feedback"""
+        self.voice_feedback_enabled = enabled and VOICE_AVAILABLE
+        status = "enabled" if self.voice_feedback_enabled else "disabled"
+        print(f"🔊 Voice feedback {status}")
+    
     def make_attempt(self, prompt):
         """Process a student's prompt attempt with visual output"""
         self.current_attempt += 1
@@ -280,6 +306,11 @@ class VisualPromptGame:
         # Provide feedback
         feedback = self.get_feedback(combined_score)
         print(f"💬 {feedback}")
+        
+        # Voice feedback
+        if self.voice_feedback_enabled:
+            speak_score(combined_score, is_best, enabled=True)
+            speak_feedback(feedback, enabled=True)
         
         # Save attempt data
         attempt_data = {

@@ -12,6 +12,17 @@ import json
 import os
 import random
 
+# Import voice feedback
+try:
+    from voice_feedback import speak_feedback, speak_score
+    VOICE_AVAILABLE = True
+except ImportError:
+    VOICE_AVAILABLE = False
+    def speak_feedback(*args, **kwargs):
+        pass
+    def speak_score(*args, **kwargs):
+        pass
+
 class MockStableDiffusionEngine:
     """Mock engine that creates images based on prompt keywords"""
     
@@ -85,8 +96,17 @@ class MockStableDiffusionEngine:
 class ProperVisualGame:
     """Proper visual game that shows target first"""
     
-    def __init__(self, target_image_path=None):
+    def __init__(self, target_image_path=None, voice_feedback_enabled=True):
         print("🎯 Initializing Visual Prompt Guessing Game...")
+        
+        # Voice feedback setting
+        self.voice_feedback_enabled = voice_feedback_enabled and VOICE_AVAILABLE
+        if self.voice_feedback_enabled:
+            print("🔊 Voice feedback enabled")
+        elif VOICE_AVAILABLE:
+            print("🔇 Voice feedback disabled by user")
+        else:
+            print("⚠️  Voice feedback not available (pyttsx3 or espeak missing)")
         
         # Initialize engine
         self.engine = MockStableDiffusionEngine()
@@ -265,6 +285,12 @@ class ProperVisualGame:
         
         return feedback, hints
     
+    def set_voice_feedback(self, enabled: bool):
+        """Enable or disable voice feedback"""
+        self.voice_feedback_enabled = enabled and VOICE_AVAILABLE
+        status = "enabled" if self.voice_feedback_enabled else "disabled"
+        print(f"🔊 Voice feedback {status}")
+    
     def make_attempt(self, prompt):
         """Process a student's prompt attempt"""
         self.current_attempt += 1
@@ -305,6 +331,11 @@ class ProperVisualGame:
         
         for hint in hints:
             print(f"   {hint}")
+        
+        # Voice feedback
+        if self.voice_feedback_enabled:
+            speak_score(combined_score, is_best, enabled=True)
+            speak_feedback(feedback, hints, enabled=True, speak_hints=True)
         
         # Save attempt
         attempt_data = {
