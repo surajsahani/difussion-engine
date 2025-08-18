@@ -57,6 +57,7 @@ That's it! The game will guide you through setup and start your first challenge.
 - **📊 Smart Scoring**: 4-metric similarity analysis (structure, colors, edges, composition)
 - **🎓 Educational Feedback**: Learn what makes prompts effective
 - **📈 Progress Tracking**: See your improvement over time
+- **🖼️ Visual Display**: See target and generated images side-by-side
 - **🌍 Works Offline**: After setup, only AI generation needs internet
 - **🖥️ Cross-Platform**: Native support for Windows, macOS, and Linux
 
@@ -121,15 +122,33 @@ ai-prompt-game
 
 **Note**: All platforms use the same commands once installed. The game automatically detects your operating system and adapts accordingly.
 
+## 🖼️ Visual Features
+
+The game includes **visual display mode** that shows images side-by-side:
+
+- **Target Image**: The image you're trying to recreate
+- **Generated Image**: Your AI-generated result  
+- **Real-time Comparison**: See both images with similarity scores
+- **Automatic Saving**: All images saved to `~/.ai-prompt-game/generated/`
+
+### Visual Mode Commands
+```bash
+ai-prompt-game              # Full visual mode (default)
+ai-prompt-game --no-visual  # Text-only mode
+```
+
+**Visual mode requires**: `matplotlib` (automatically installed with the package)
+
 ## 🎯 Game Commands
 
 ```bash
-ai-prompt-game                    # Start interactive game
+ai-prompt-game                    # Start interactive game with visual display
 ai-prompt-game --setup           # Setup game files and targets
 ai-prompt-game --list-targets    # Show available challenges
 ai-prompt-game --target sunset   # Play specific challenge
 ai-prompt-game --quick           # Quick 5-minute game
 ai-prompt-game --stats           # Show your progress
+ai-prompt-game --no-visual       # Text-only mode (no image display)
 ```
 
 ### In-Game Commands
@@ -174,14 +193,40 @@ ai-prompt-game --model replicate
 
 ## 📊 Scoring System
 
-The game uses a sophisticated 4-metric scoring system:
+The game uses an advanced multi-metric scoring system:
 
+### **🤖 LLaVA AI-Enhanced Scoring (Optional)**
+- **LLaVA Semantic (25%)**: AI-powered semantic understanding of image similarity
+- **Structure (20%)**: Layout and composition matching
+- **Colors (20%)**: Color distribution and palette
+- **Edges (20%)**: Shape and boundary detection  
+- **Dominant Colors (15%)**: Key color matching
+
+### **🔧 Traditional Scoring (Fallback)**
 - **Structure (30%)**: Layout and composition matching
 - **Colors (25%)**: Color distribution and palette
 - **Edges (25%)**: Shape and boundary detection  
 - **Dominant Colors (20%)**: Key color matching
 
 **Combined Score**: Weighted average of all metrics (0-100%)
+
+### **🚀 Enable LLaVA Enhancement**
+```bash
+# Install LLaVA dependencies (large download ~13GB)
+pip install transformers torch torchvision
+
+# Use LLaVA-enhanced scoring (default)
+ai-prompt-game
+
+# Disable LLaVA (traditional metrics only)
+ai-prompt-game --no-llava
+```
+
+**LLaVA Benefits:**
+- 🧠 Semantic understanding (not just pixel comparison)
+- 🎯 Better scoring for artistic and stylistic matches
+- 💬 AI explanations of what matches/differs
+- 🎨 Understands context, mood, and composition
 
 ## 🎯 Challenge Targets
 
