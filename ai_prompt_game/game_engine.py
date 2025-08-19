@@ -278,7 +278,8 @@ class PromptGame:
             "messages": [
                 {
                     "role": "user",
-                    "content": f"You are a Motivational Speaker. Based on the score {score} and number of attempts {attempt_num} Motivate the player in 3 short but powerful sentences"
+                    "content": "You are a motivational speaker. The player has a current score of {score} and has attempted {attempt_num} times. Give them exactly 2 short, powerful, and inspiring sentences that motivate them to keep playing and give their best effort."
+
                 }
             ],
             "model": "google/gemma-2-2b-it:nebius"
