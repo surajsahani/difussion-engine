@@ -34,67 +34,68 @@ def download_targets(game_dir):
     # Define target images with their URLs and metadata
     targets = [
         {
-            "id": "car",
-            "name": "car",
-            "difficulty": "Hard",
-            "description": "A bear driving car",
-            "url": "https://images.unsplash.com/photo-1755593853479-10550d810c22?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            "filename": "car.png",
+            "id": "fox",
+            "name": "Fox",
+            "difficulty": "Medium",
+            "description": "A cute fox in a natural setting",
+            "url": "https://cdn.pixabay.com/photo/2022/12/04/00/42/foxes-7633559_1280.png",
+            "filename": "fox.png",
             "hints": [
-                "Cute bear driving a toy car illustration.",
-                "Retro flat design cartoon vehicle with animal driver.",
-                "Minimal playful vector art of bear in car."
+                "Focus on the cute fox features",
+                "Describe the orange and white fur",
+                "Mention the natural forest setting"
             ]
         },
         {
-            "id": "foxes",
-            "name": "Foxes",
-            "difficulty": "Medium",
-            "description": "Two cute foxes sitting on tree",
-            "url": "https://cdn.pixabay.com/photo/2022/12/04/00/42/foxes-7633559_1280.png",
-            "filename": "foxes.png",
+            "id": "car",
+            "name": "Car",
+            "difficulty": "Hard",
+            "description": "A bear driving a colorful toy car",
+            "url": "https://images.unsplash.com/photo-1755593853479-10550d810c22?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "filename": "car.png",
             "hints": [
-                "Create Two Foxes setting on tree",
-                "Two cute Foxes setting on tree"
-                                        ]
+                "Cute bear driving a toy car illustration",
+                "Retro flat design cartoon vehicle",
+                "Minimal playful vector art style"
+            ]
         },
         {
-            "id": "LLama",
-            "name": "LLama",
+            "id": "llama",
+            "name": "Llama",
             "difficulty": "Medium",
-            "description": "A sheep in snow fall",
+            "description": "A fluffy llama in a winter landscape",
             "url": "https://images.unsplash.com/photo-1755590764677-68c742d97e8f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwcm9maWxlLXBhZ2V8MXx8fGVufDB8fHx8fA%3D%3D",
             "filename": "llama.jpg",
             "hints": [
-                "Mention the atmospheric mist",
-                "Describe the forest path",
-                "Include the soft, diffused lighting"
+                "Fluffy white llama in snow",
+                "Mention the winter landscape",
+                "Include the soft, woolly texture"
             ]
         },
         {
             "id": "van",
             "name": "Van",
             "difficulty": "Easy",
-            "description": "A van climbling mountain beside ocean",
+            "description": "A colorful van climbing a mountain road beside the ocean",
             "url": "https://images.unsplash.com/photo-1755590764782-d55944ec0a61?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwcm9maWxlLXBhZ2V8Mnx8fGVufDB8fHx8fA%3D%3D",
             "filename": "van.jpg",
             "hints": [
-                "Van climbing a mountain",
-                "Create a illustration of blue van",
-                "Can Climbing a mountain besides ocean"
+                "Colorful van on mountain road",
+                "Ocean view in the background",
+                "Adventure travel illustration style"
             ]
         },
         {
             "id": "owl",
-            "name": "owl",
+            "name": "Owl",
             "difficulty": "Hard",
-            "description": "owl illlustration",
+            "description": "A wise-looking owl with detailed feathers",
             "url": "https://cdn.pixabay.com/photo/2022/12/04/00/01/owl-7633529_1280.png",
             "filename": "owl.png",
             "hints": [
-                "Describe the colorful aurora lights",
-                "Mention the snowy landscape",
-                "Include the dancing/flowing motion"
+                "Focus on the detailed feather patterns",
+                "Mention the wise, piercing eyes",
+                "Include the realistic illustration style"
             ]
         }
     ]

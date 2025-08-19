@@ -35,16 +35,16 @@ That's it! The game will guide you through setup and start your first challenge.
 
 ### Example Game Flow
 ```
-🎯 Target: Mountain Sunset
-[Shows beautiful sunset image]
+🎯 Target: Fox
+[Shows cute fox image]
 
-[Attempt #1] Your prompt: landscape
-📊 Score: 23.4% - "Too generic! Describe the colors and lighting."
+[Attempt #1] Your prompt: animal
+📊 Score: 23.4% - "Too generic! Describe the specific animal and setting."
 
-[Attempt #2] Your prompt: sunset over mountains  
-📊 Score: 67.8% - "Better! Add more details about the dramatic sky."
+[Attempt #2] Your prompt: orange fox in forest  
+📊 Score: 67.8% - "Better! Add more details about the fox's features."
 
-[Attempt #3] Your prompt: golden sunset over mountain peaks with dramatic clouds
+[Attempt #3] Your prompt: cute orange fox with white fur sitting in natural forest setting
 📊 Score: 89.1% - "Excellent! Almost perfect!"
 
 🎉 You're learning prompt engineering!
@@ -230,20 +230,20 @@ ai-prompt-game --no-llava
 
 ## 🎯 Challenge Targets
 
-- **🌅 Mountain Sunset** (Medium) - Golden hour over peaks
-- **🌊 Ocean Waves** (Hard) - Powerful waves on rocky shore
-- **🌲 Misty Forest** (Medium) - Peaceful forest path with mist
-- **🏖️ Tropical Beach** (Easy) - Crystal clear water and white sand
-- **🌌 Northern Lights** (Hard) - Aurora borealis over snow
+- **🦊 Fox** (Medium) - A cute fox in a natural setting
+- **🚗 Car** (Hard) - A bear driving a colorful toy car
+- **🦙 Llama** (Medium) - A fluffy llama in a winter landscape
+- **🚐 Van** (Easy) - A colorful van climbing a mountain road beside the ocean
+- **🦉 Owl** (Hard) - A wise-looking owl with detailed feathers
 
 ## 📈 Example Learning Progression
 
 ```
-Session 1: "landscape" → 15.6% → "Be more specific!"
-Session 2: "sunset mountains" → 42.3% → "Add color details!"  
-Session 3: "golden sunset over mountain peaks" → 68.7% → "Great progress!"
-Session 4: "golden sunset over mountain peaks with dramatic clouds" → 89.1% → "Almost perfect!"
-Session 5: "golden sunset over mountain peaks with dramatic orange clouds and lake reflection" → 96.7% → "MASTERY!"
+Session 1: "animal" → 15.6% → "Be more specific!"
+Session 2: "fox forest" → 42.3% → "Add color details!"  
+Session 3: "orange fox in natural setting" → 68.7% → "Great progress!"
+Session 4: "cute orange fox with white fur in forest" → 89.1% → "Almost perfect!"
+Session 5: "adorable orange and white fox sitting peacefully in natural forest environment" → 96.7% → "MASTERY!"
 
 🎓 Result: Student learned effective prompt engineering!
 ```
