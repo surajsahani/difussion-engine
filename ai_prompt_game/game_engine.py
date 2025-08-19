@@ -2,7 +2,7 @@
 """
 Core game engine for AI Prompt Engineering Game
 """
-
+import requests
 import os
 import json
 import random
@@ -36,7 +36,11 @@ except ImportError:
 from .image_generator import ImageGenerator
 from .comparison import ImageComparison
 from .utils import load_target_image, save_player_stats, get_game_directory
+from dotenv import load_dotenv
+import pyttsx3
 
+
+load_dotenv()
 class PromptGame:
     """Main game engine"""
     
@@ -168,7 +172,6 @@ class PromptGame:
     def choose_target(self):
         """Let player choose a target"""
         targets = self.get_available_targets()
-        print("The targets are ",targets)
         if not targets:
             print("❌ No targets available!")
             print("💡 Run: ai-prompt-game --setup")
@@ -232,7 +235,13 @@ class PromptGame:
             print("💡 Hints:")
             for hint in self.current_target['hints'][:2]:  # Show first 2 hints
                 print(f"   • {hint}")
-    
+    def speak_feedback(self,feedback_text):
+        engine = pyttsx3.init()
+        engine.setProperty('rate', 160)  # speed of speech
+        engine.setProperty('volume', 1)  # volume (0.0 to 1.0)
+        engine.say(feedback_text)
+        engine.runAndWait()
+
     def make_attempt(self, prompt):
         """Process a prompt attempt"""
         attempt_num = len(self.attempts) + 1
@@ -294,8 +303,10 @@ class PromptGame:
         
         # Generate feedback
         feedback = self.get_feedback(combined_score, attempt_num)
+        text_feedback = self.get_text_feedback(round(combined_score,1),attempt_num)
         print(f"\n💬 {feedback}")
-        
+        print(f"The text feedback is {text_feedback}")
+        self.speak_feedback(text_feedback)
         # Save attempt
         attempt_data = {
             'attempt': attempt_num,
@@ -308,6 +319,30 @@ class PromptGame:
         self.attempts.append(attempt_data)
         
         return attempt_data
+    
+    def get_text_feedback(self,score,attempt_num):
+        API_URL = "https://router.huggingface.co/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
+        }
+
+        def query(payload):
+            response = requests.post(API_URL, headers=headers, json=payload)
+            return response.json()
+
+        response = query({
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "You are a motivational speaker. The player has a current score of {score} and has attempted {attempt_num} times. Give them exactly 2 short, powerful, and inspiring sentences that motivate them to keep playing and give their best effort."
+
+                }
+            ],
+            "model": "google/gemma-2-2b-it:nebius"
+        })
+
+        return response["choices"][0]["message"]["content"]
+
     
     def display_target_image(self):
         """Display target image with multiple fallback methods"""
