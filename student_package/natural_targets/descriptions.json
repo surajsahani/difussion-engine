@@ -1,5 +1,5 @@
 {
-  "mountain_sunset.jpg": {
+  "foxes.png": {
     "difficulty": "Medium",
     "key_elements": [
       "mountains",
@@ -19,7 +19,7 @@
       "golden hour landscape with mountains and clouds"
     ]
   },
-  "ocean_waves.jpg": {
+  "llama.jpg": {
     "difficulty": "Hard",
     "key_elements": [
       "ocean",
@@ -39,7 +39,7 @@
       "coastal waves with spray and motion"
     ]
   },
-  "forest_path.jpg": {
+  "owl.png": {
     "difficulty": "Medium",
     "key_elements": [
       "forest",
@@ -59,7 +59,7 @@
       "atmospheric forest scene with morning mist"
     ]
   },
-  "desert_dunes.jpg": {
+  "van.jpg": {
     "difficulty": "Easy",
     "key_elements": [
       "sand dunes",
@@ -78,7 +78,7 @@
       "minimalist dune photography"
     ]
   },
-  "tropical_beach.jpg": {
+  "car.png": {
     "difficulty": "Easy",
     "key_elements": [
       "beach",

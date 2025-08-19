@@ -132,7 +132,7 @@ class PromptGame:
     def choose_target(self):
         """Let player choose a target"""
         targets = self.get_available_targets()
-        
+        print("The targets are ",targets)
         if not targets:
             print("❌ No targets available!")
             print("💡 Run: ai-prompt-game --setup")
