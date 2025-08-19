@@ -1,22 +1,140 @@
-#!/usr/bin/env python3
+
 """
 Image comparison module for scoring similarity
 """
 
 import cv2
 import numpy as np
+import pickle
+import os
+from pathlib import Path
 
 class ImageComparison:
     """Handles image similarity comparison using multiple metrics"""
     
-    def __init__(self):
+    def __init__(self, cache_dir="hog_cache"):
         self.weights = {
-            'structural': 0.30,
-            'histogram': 0.25,
-            'edges': 0.25,
-            'colors': 0.20
+            'hog_features': 0.35,    
+            'structural': 0.20,      
+            'histogram': 0.15,       
+            'edges': 0.15,           
+            'colors': 0.10,          
+            'hsv_similarity': 0.05   
         }
+        
+        
+        self.cache_dir = Path(cache_dir)
+        self.cache_dir.mkdir(exist_ok=True)
+        self.hog_cache = {}
+        
+        
+        self.hog = cv2.HOGDescriptor()
+        
+    def get_hog_features(self, image):
+        """Extract HOG features for semantic texture/shape analysis"""
+        
+        resized = cv2.resize(image, (128, 128))
+        
+        
+        gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
+        
+        
+        features = self.hog.compute(gray)
+        
+        return features.flatten()
     
+    def hog_similarity(self, img1, img2):
+        """Calculate HOG feature similarity for semantic content matching"""
+        
+        hog1 = self.get_hog_features(img1)
+        hog2 = self.get_hog_features(img2)
+        
+        
+        dot_product = np.dot(hog1, hog2)
+        norm1 = np.linalg.norm(hog1)
+        norm2 = np.linalg.norm(hog2)
+        
+        if norm1 == 0 or norm2 == 0:
+            return 0.0
+            
+        similarity = dot_product / (norm1 * norm2)
+        return max(0, similarity)
+    
+    def get_cached_hog_features(self, image_path):
+        """Get HOG features from cache or compute and cache them"""
+        if isinstance(image_path, str):
+            cache_key = str(Path(image_path).absolute())
+        else:
+            
+            cache_key = str(hash(image_path.tobytes()))
+        
+        cache_file = self.cache_dir / f"{hash(cache_key)}.pkl"
+        
+        if cache_file.exists():
+            try:
+                with open(cache_file, 'rb') as f:
+                    return pickle.load(f)
+            except:
+                pass
+        
+        
+        features = self.get_hog_features(image_path)
+        try:
+            with open(cache_file, 'wb') as f:
+                pickle.dump(features, f)
+        except:
+            pass
+            
+        return features
+    
+    def hsv_similarity(self, img1, img2):
+        """Calculate HSV color space similarity for better color perception"""
+        
+        hsv1 = cv2.cvtColor(img1, cv2.COLOR_BGR2HSV)
+        hsv2 = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
+        
+        
+        h_hist1 = cv2.calcHist([hsv1], [0], None, [180], [0, 180])
+        s_hist1 = cv2.calcHist([hsv1], [1], None, [256], [0, 256])
+        v_hist1 = cv2.calcHist([hsv1], [2], None, [256], [0, 256])
+        
+        h_hist2 = cv2.calcHist([hsv2], [0], None, [180], [0, 180])
+        s_hist2 = cv2.calcHist([hsv2], [1], None, [256], [0, 256])
+        v_hist2 = cv2.calcHist([hsv2], [2], None, [256], [0, 256])
+        
+        
+        h_sim = cv2.compareHist(h_hist1, h_hist2, cv2.HISTCMP_CORREL)
+        s_sim = cv2.compareHist(s_hist1, s_hist2, cv2.HISTCMP_CORREL)
+        v_sim = cv2.compareHist(v_hist1, v_hist2, cv2.HISTCMP_CORREL)
+        
+        
+        hsv_similarity = (h_sim * 0.5 + s_sim * 0.3 + v_sim * 0.2)
+        return max(0, hsv_similarity)
+    
+    def lab_similarity(self, img1, img2):
+        """Calculate LAB color space similarity for perceptual color matching"""
+        
+        lab1 = cv2.cvtColor(img1, cv2.COLOR_BGR2LAB)
+        lab2 = cv2.cvtColor(img2, cv2.COLOR_BGR2LAB)
+        
+        
+        l_hist1 = cv2.calcHist([lab1], [0], None, [256], [0, 256])
+        a_hist1 = cv2.calcHist([lab1], [1], None, [256], [0, 256])
+        b_hist1 = cv2.calcHist([lab1], [2], None, [256], [0, 256])
+        
+        l_hist2 = cv2.calcHist([lab2], [0], None, [256], [0, 256])
+        a_hist2 = cv2.calcHist([lab2], [1], None, [256], [0, 256])
+        b_hist2 = cv2.calcHist([lab2], [2], None, [256], [0, 256])
+        
+        
+        l_sim = cv2.compareHist(l_hist1, l_hist2, cv2.HISTCMP_CORREL)
+        a_sim = cv2.compareHist(a_hist1, a_hist2, cv2.HISTCMP_CORREL)
+        b_sim = cv2.compareHist(b_hist1, b_hist2, cv2.HISTCMP_CORREL)
+        
+        
+        lab_similarity = (l_sim * 0.4 + a_sim * 0.3 + b_sim * 0.3)
+        return max(0, lab_similarity)
+
     def compare(self, generated_image, target_image):
         """
         Compare two images and return similarity scores
@@ -28,45 +146,51 @@ class ImageComparison:
         Returns:
             dict: Similarity scores for each metric plus combined score
         """
-        # Ensure same size
+        
         if generated_image.shape != target_image.shape:
             generated_image = cv2.resize(
                 generated_image, 
                 (target_image.shape[1], target_image.shape[0])
             )
         
-        # Calculate individual metrics
+        
+        hog_sim = self.hog_similarity(generated_image, target_image)
         structural_sim = self.structural_similarity(generated_image, target_image)
         histogram_sim = self.histogram_similarity(generated_image, target_image)
         edge_sim = self.edge_similarity(generated_image, target_image)
         color_sim = self.dominant_color_similarity(generated_image, target_image)
+        hsv_sim = self.hsv_similarity(generated_image, target_image)
         
-        # Calculate combined score
+        
         combined = (
+            hog_sim * self.weights['hog_features'] +
             structural_sim * self.weights['structural'] +
             histogram_sim * self.weights['histogram'] +
             edge_sim * self.weights['edges'] +
-            color_sim * self.weights['colors']
+            color_sim * self.weights['colors'] +
+            hsv_sim * self.weights['hsv_similarity']
         )
         
         return {
             'combined': max(0, min(1, combined)),
+            'hog_features': max(0, hog_sim),
             'structural': max(0, structural_sim),
             'histogram': max(0, histogram_sim),
             'edges': max(0, edge_sim),
-            'colors': max(0, color_sim)
+            'colors': max(0, color_sim),
+            'hsv_similarity': max(0, hsv_sim)
         }
     
     def structural_similarity(self, img1, img2):
         """Calculate structural similarity using MSE"""
-        # Convert to grayscale
+        
         gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
         gray2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
         
-        # Calculate MSE
+        
         mse = np.mean((gray1.astype(float) - gray2.astype(float)) ** 2)
         
-        # Convert to similarity score
+        
         max_mse = 255 * 255
         similarity = 1 - (mse / max_mse)
         
@@ -74,24 +198,24 @@ class ImageComparison:
     
     def histogram_similarity(self, img1, img2):
         """Calculate color histogram similarity"""
-        # Calculate 3D histograms
+        
         hist1 = cv2.calcHist([img1], [0, 1, 2], None, [50, 50, 50], [0, 256, 0, 256, 0, 256])
         hist2 = cv2.calcHist([img2], [0, 1, 2], None, [50, 50, 50], [0, 256, 0, 256, 0, 256])
         
-        # Compare using correlation
+        
         correlation = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
         
-        # Also try chi-square and intersection for robustness
+        
         chi_square = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CHISQR)
         intersection = cv2.compareHist(hist1, hist2, cv2.HISTCMP_INTERSECT)
         
-        # Normalize chi-square (lower is better, so invert)
+        
         chi_square_norm = max(0, 1 - (chi_square / 1000000))
         
-        # Normalize intersection
+        
         intersection_norm = intersection / max(np.sum(hist1), np.sum(hist2))
         
-        # Combine methods
+        
         combined = (
             max(0, correlation) * 0.5 +
             chi_square_norm * 0.3 +
@@ -102,15 +226,15 @@ class ImageComparison:
     
     def edge_similarity(self, img1, img2):
         """Calculate edge pattern similarity"""
-        # Convert to grayscale
+        
         gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
         gray2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
         
-        # Detect edges
+        
         edges1 = cv2.Canny(gray1, 50, 150)
         edges2 = cv2.Canny(gray2, 50, 150)
         
-        # Compare edge patterns
+        
         edge_diff = np.mean(np.abs(edges1.astype(float) - edges2.astype(float))) / 255
         similarity = 1 - edge_diff
         
@@ -119,11 +243,11 @@ class ImageComparison:
     def dominant_color_similarity(self, img1, img2):
         """Calculate dominant color similarity using k-means"""
         try:
-            # Get dominant colors for both images
+            
             colors1 = self.get_dominant_colors(img1, k=3)
             colors2 = self.get_dominant_colors(img2, k=3)
             
-            # Calculate minimum distances between color sets
+            
             distances = []
             for color1 in colors1:
                 min_dist = float('inf')
@@ -132,15 +256,15 @@ class ImageComparison:
                     min_dist = min(min_dist, dist)
                 distances.append(min_dist)
             
-            # Convert to similarity score
+            
             avg_distance = np.mean(distances)
-            max_distance = 255 * np.sqrt(3)  # Maximum possible distance in RGB space
+            max_distance = 255 * np.sqrt(3)  
             similarity = 1 - (avg_distance / max_distance)
             
             return similarity
             
         except Exception:
-            # Fallback to simple mean color comparison
+            
             mean1 = np.mean(img1.reshape(-1, 3), axis=0)
             mean2 = np.mean(img2.reshape(-1, 3), axis=0)
             
@@ -151,11 +275,11 @@ class ImageComparison:
     
     def get_dominant_colors(self, image, k=3):
         """Extract dominant colors using k-means clustering"""
-        # Reshape image to list of pixels
+        
         data = image.reshape((-1, 3))
         data = np.float32(data)
         
-        # Define criteria and apply k-means
+        
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 20, 1.0)
         _, labels, centers = cv2.kmeans(data, k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
         
@@ -164,6 +288,13 @@ class ImageComparison:
     def explain_scores(self, scores):
         """Generate human-readable explanation of scores"""
         explanations = []
+        
+        if scores['hog_features'] > 0.8:
+            explanations.append("✅ Great semantic texture and shape match")
+        elif scores['hog_features'] > 0.6:
+            explanations.append("🤔 Good semantic texture, but some shape differences")
+        else:
+            explanations.append("❌ Very different semantic content - focus on overall texture")
         
         if scores['structural'] > 0.8:
             explanations.append("✅ Great composition and layout match")
@@ -192,5 +323,12 @@ class ImageComparison:
             explanations.append("🤔 Some dominant colors match")
         else:
             explanations.append("❌ Different main colors - what are the key colors?")
+        
+        if scores['hsv_similarity'] > 0.8:
+            explanations.append("✅ Excellent color perception match")
+        elif scores['hsv_similarity'] > 0.6:
+            explanations.append("🤔 Good color perception, but some differences")
+        else:
+            explanations.append("❌ Very different color perception - describe the color palette")
         
         return explanations
