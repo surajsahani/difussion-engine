@@ -34,38 +34,37 @@ def download_targets(game_dir):
     # Define target images with their URLs and metadata
     targets = [
         {
-            "id": "sunset",
-            "name": "Mountain Sunset",
-            "difficulty": "Medium",
-            "description": "Golden sunset over mountain peaks with dramatic clouds",
-            "url": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=512&q=80",
-            "filename": "mountain_sunset.jpg",
-            "hints": [
-                "Focus on the golden/orange colors",
-                "Mention the mountain silhouettes",
-                "Describe the dramatic sky"
-            ]
-        },
-        {
-            "id": "ocean",
-            "name": "Ocean Waves",
+            "id": "car",
+            "name": "car",
             "difficulty": "Hard",
-            "description": "Powerful ocean waves crashing on rocky shore",
-            "url": "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=512&q=80",
-            "filename": "ocean_waves.jpg",
+            "description": "A bear driving car",
+            "url": "https://images.unsplash.com/photo-1755593853479-10550d810c22?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "filename": "car.png",
             "hints": [
-                "Describe the wave motion and spray",
-                "Mention the rocky coastline",
-                "Include the power and energy"
+                "Cute bear driving a toy car illustration.",
+                "Retro flat design cartoon vehicle with animal driver.",
+                "Minimal playful vector art of bear in car."
             ]
         },
         {
-            "id": "forest",
-            "name": "Misty Forest",
+            "id": "foxes",
+            "name": "Foxes",
             "difficulty": "Medium",
-            "description": "Peaceful forest path with morning mist and soft lighting",
-            "url": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=512&q=80",
-            "filename": "forest_path.jpg",
+            "description": "Two cute foxes sitting on tree",
+            "url": "https://cdn.pixabay.com/photo/2022/12/04/00/42/foxes-7633559_1280.png",
+            "filename": "foxes.png",
+            "hints": [
+                "Create Two Foxes setting on tree",
+                "Two cute Foxes setting on tree"
+                                        ]
+        },
+        {
+            "id": "LLama",
+            "name": "LLama",
+            "difficulty": "Medium",
+            "description": "A sheep in snow fall",
+            "url": "https://images.unsplash.com/photo-1755590764677-68c742d97e8f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwcm9maWxlLXBhZ2V8MXx8fGVufDB8fHx8fA%3D%3D",
+            "filename": "llama.jpg",
             "hints": [
                 "Mention the atmospheric mist",
                 "Describe the forest path",
@@ -73,25 +72,25 @@ def download_targets(game_dir):
             ]
         },
         {
-            "id": "beach",
-            "name": "Tropical Beach",
+            "id": "van",
+            "name": "Van",
             "difficulty": "Easy",
-            "description": "Crystal clear tropical water with white sand beach",
-            "url": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=512&q=80",
-            "filename": "tropical_beach.jpg",
+            "description": "A van climbling mountain beside ocean",
+            "url": "https://images.unsplash.com/photo-1755590764782-d55944ec0a61?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwcm9maWxlLXBhZ2V8Mnx8fGVufDB8fHx8fA%3D%3D",
+            "filename": "van.jpg",
             "hints": [
-                "Focus on the crystal clear water",
-                "Mention the white sand",
-                "Describe the tropical paradise feel"
+                "Van climbing a mountain",
+                "Create a illustration of blue van",
+                "Can Climbing a mountain besides ocean"
             ]
         },
         {
-            "id": "aurora",
-            "name": "Northern Lights",
+            "id": "owl",
+            "name": "owl",
             "difficulty": "Hard",
-            "description": "Aurora borealis dancing over snowy landscape",
-            "url": "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=512&q=80",
-            "filename": "northern_lights.jpg",
+            "description": "owl illlustration",
+            "url": "https://cdn.pixabay.com/photo/2022/12/04/00/01/owl-7633529_1280.png",
+            "filename": "owl.png",
             "hints": [
                 "Describe the colorful aurora lights",
                 "Mention the snowy landscape",
