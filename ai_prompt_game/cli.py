@@ -22,7 +22,7 @@ Examples:
   ai-prompt-game                    # Start interactive game with visual display
   ai-prompt-game --setup           # Setup game files and targets
   ai-prompt-game --list-targets    # Show available challenge targets
-  ai-prompt-game --target sunset   # Play specific target
+  ai-prompt-game --target fox      # Play specific target
   ai-prompt-game --quick           # Quick 5-minute game
   ai-prompt-game --stats           # Show your progress stats
   ai-prompt-game --no-visual       # Text-only mode (no image windows)
@@ -41,7 +41,7 @@ For more help: https://github.com/yourusername/ai-prompt-game
     parser.add_argument("--setup", action="store_true", 
                        help="Setup game files and download targets")
     parser.add_argument("--target", type=str, 
-                       help="Play specific target (e.g., 'sunset', 'ocean', 'forest')")
+                       help="Play specific target (e.g., 'fox', 'car', 'llama')")
     parser.add_argument("--list-targets", action="store_true",
                        help="List all available challenge targets")
     parser.add_argument("--quick", action="store_true",

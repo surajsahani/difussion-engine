@@ -49,7 +49,7 @@ class PromptGame:
         
         # Initialize components
         self.generator = ImageGenerator(model_type)
-        self.comparator = ImageComparison(use_llava=use_llava)
+        self.comparator = ImageComparison()
         
         # Game state
         self.current_target = None
