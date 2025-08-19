@@ -19,12 +19,19 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  ai-prompt-game                    # Start interactive game
+  ai-prompt-game                    # Start interactive game with visual display
   ai-prompt-game --setup           # Setup game files and targets
   ai-prompt-game --list-targets    # Show available challenge targets
   ai-prompt-game --target sunset   # Play specific target
   ai-prompt-game --quick           # Quick 5-minute game
   ai-prompt-game --stats           # Show your progress stats
+  ai-prompt-game --no-visual       # Text-only mode (no image windows)
+
+Visual Features:
+  • Target and generated images displayed side-by-side
+  • Real-time similarity scoring with visual feedback
+  • LLaVA AI-powered semantic image comparison (if available)
+  • All images automatically saved to ~/.ai-prompt-game/generated/
 
 For more help: https://github.com/yourusername/ai-prompt-game
         """
@@ -50,6 +57,10 @@ For more help: https://github.com/yourusername/ai-prompt-game
                        help="Number of inference steps (default: 20)")
     parser.add_argument("--guidance", type=float, default=7.5,
                        help="Guidance scale (default: 7.5)")
+    parser.add_argument("--no-visual", action="store_true",
+                       help="Disable visual image display (text-only mode)")
+    parser.add_argument("--no-llava", action="store_true",
+                       help="Disable LLaVA AI comparison (use traditional metrics only)")
     
     # Utility options
     parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
@@ -90,7 +101,9 @@ For more help: https://github.com/yourusername/ai-prompt-game
     try:
         game = PromptGame(
             model_type=args.model,
-            verbose=args.verbose
+            verbose=args.verbose,
+            visual_mode=not getattr(args, 'no_visual', False),
+            use_llava=not getattr(args, 'no_llava', False)
         )
         
         if args.target:

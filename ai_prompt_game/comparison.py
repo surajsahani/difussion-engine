@@ -1,6 +1,7 @@
 
 """
 Image comparison module for scoring similarity
+Enhanced with LLaVA vision model for intelligent semantic comparison
 """
 
 import cv2
@@ -10,7 +11,7 @@ import os
 from pathlib import Path
 
 class ImageComparison:
-    """Handles image similarity comparison using multiple metrics"""
+    """Handles image similarity comparison using multiple metrics including LLaVA"""
     
     def __init__(self, cache_dir="hog_cache"):
         self.weights = {
@@ -284,6 +285,113 @@ class ImageComparison:
         _, labels, centers = cv2.kmeans(data, k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
         
         return centers
+    
+    def llava_similarity(self, generated_image, target_image):
+        """
+        Use LLaVA to perform semantic image comparison
+        
+        Returns:
+            tuple: (similarity_score, explanation)
+        """
+        try:
+            # Convert OpenCV images to PIL
+            target_pil = Image.fromarray(cv2.cvtColor(target_image, cv2.COLOR_BGR2RGB))
+            generated_pil = Image.fromarray(cv2.cvtColor(generated_image, cv2.COLOR_BGR2RGB))
+            
+            # Create comparison prompt
+            prompt = """<image>
+
+Look at these two images. The first image is the TARGET that we want to match. The second image is the GENERATED image that was created to match the target.
+
+<image>
+
+Please analyze how similar these images are and provide:
+1. A similarity score from 0.0 to 1.0 (where 1.0 is perfect match)
+2. A brief explanation of what matches and what doesn't
+
+Focus on:
+- Overall composition and subject matter
+- Colors and lighting
+- Style and mood
+- Key visual elements
+
+Respond in this exact format:
+SCORE: [0.0-1.0]
+EXPLANATION: [brief explanation]"""
+
+            # Process images and prompt
+            inputs = self.llava_processor(prompt, images=[target_pil, generated_pil], return_tensors="pt")
+            
+            # Move to same device as model
+            if hasattr(self.llava_model, 'device'):
+                inputs = {k: v.to(self.llava_model.device) for k, v in inputs.items()}
+            
+            # Generate response
+            import torch
+            with torch.no_grad():
+                output = self.llava_model.generate(
+                    **inputs,
+                    max_new_tokens=200,
+                    do_sample=False,
+                    temperature=0.1
+                )
+            
+            # Decode response
+            response = self.llava_processor.decode(output[0], skip_special_tokens=True)
+            
+            # Extract score and explanation
+            score, explanation = self.parse_llava_response(response)
+            
+            return score, explanation
+            
+        except Exception as e:
+            print(f"⚠️  LLaVA comparison error: {e}")
+            return 0.5, f"LLaVA error: {str(e)}"
+    
+    def parse_llava_response(self, response):
+        """Parse LLaVA response to extract score and explanation"""
+        try:
+            # Look for SCORE: and EXPLANATION: patterns
+            lines = response.split('\n')
+            score = 0.5
+            explanation = "Could not parse LLaVA response"
+            
+            for line in lines:
+                line = line.strip()
+                if line.startswith('SCORE:'):
+                    score_text = line.replace('SCORE:', '').strip()
+                    try:
+                        score = float(score_text)
+                        score = max(0.0, min(1.0, score))  # Clamp to valid range
+                    except ValueError:
+                        score = 0.5
+                elif line.startswith('EXPLANATION:'):
+                    explanation = line.replace('EXPLANATION:', '').strip()
+            
+            # If no structured response, try to extract from free text
+            if score == 0.5 and explanation == "Could not parse LLaVA response":
+                # Look for numbers that might be scores
+                import re
+                score_matches = re.findall(r'(\d+\.?\d*)', response)
+                if score_matches:
+                    try:
+                        potential_score = float(score_matches[0])
+                        if 0 <= potential_score <= 1:
+                            score = potential_score
+                        elif 0 <= potential_score <= 10:
+                            score = potential_score / 10.0
+                        elif 0 <= potential_score <= 100:
+                            score = potential_score / 100.0
+                    except ValueError:
+                        pass
+                
+                # Use the response as explanation
+                explanation = response[:200] + "..." if len(response) > 200 else response
+            
+            return score, explanation
+            
+        except Exception as e:
+            return 0.5, f"Parse error: {str(e)}"
     
     def explain_scores(self, scores):
         """Generate human-readable explanation of scores"""

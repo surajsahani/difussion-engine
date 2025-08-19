@@ -8,6 +8,31 @@ import json
 import random
 from pathlib import Path
 from datetime import datetime
+import cv2
+import numpy as np
+try:
+    import matplotlib
+    # Try different backends in order of preference for macOS
+    backends_to_try = ['MacOSX', 'TkAgg', 'Qt5Agg', 'Agg']
+    
+    backend_set = False
+    for backend in backends_to_try:
+        try:
+            matplotlib.use(backend)
+            backend_set = True
+            break
+        except:
+            continue
+    
+    if not backend_set:
+        # Use default backend
+        pass
+    
+    import matplotlib.pyplot as plt
+    import matplotlib.image as mpimg
+    DISPLAY_AVAILABLE = True
+except ImportError:
+    DISPLAY_AVAILABLE = False
 from .image_generator import ImageGenerator
 from .comparison import ImageComparison
 from .utils import load_target_image, save_player_stats, get_game_directory
@@ -19,14 +44,16 @@ load_dotenv()
 class PromptGame:
     """Main game engine"""
     
-    def __init__(self, model_type="pollinations", verbose=False):
+    def __init__(self, model_type="pollinations", verbose=False, visual_mode=True, use_llava=True):
         self.model_type = model_type
         self.verbose = verbose
+        self.visual_mode = visual_mode and DISPLAY_AVAILABLE
+        self.use_llava = use_llava
         self.game_dir = get_game_directory()
         
         # Initialize components
         self.generator = ImageGenerator(model_type)
-        self.comparator = ImageComparison()
+        self.comparator = ImageComparison(use_llava=use_llava)
         
         # Game state
         self.current_target = None
@@ -34,6 +61,15 @@ class PromptGame:
         self.best_score = 0
         self.best_prompt = ""
         self.session_start = datetime.now()
+        
+        # Create generated images directory
+        self.generated_dir = self.game_dir / "generated"
+        self.generated_dir.mkdir(exist_ok=True)
+        
+        if not DISPLAY_AVAILABLE and visual_mode:
+            print("⚠️  Visual mode requested but matplotlib not available")
+            print("💡 Install with: pip install matplotlib")
+            self.visual_mode = False
     
     def play_interactive(self):
         """Interactive game mode"""
@@ -184,11 +220,15 @@ class PromptGame:
         self.show_target()
     
     def show_target(self):
-        """Show target image information"""
+        """Show target image information and display if visual mode"""
         if not self.current_target:
             return
         
         print(f"\n🖼️  TARGET: {self.current_target['name']}")
+        
+        # Show target image visually if in visual mode
+        if self.visual_mode:
+            self.display_target_image()
         
         # Show hints if available
         if 'hints' in self.current_target:
@@ -226,6 +266,10 @@ class PromptGame:
             print("❌ Could not load target image")
             return None
         
+        # Save generated image
+        gen_filename = self.generated_dir / f"attempt_{attempt_num:03d}_generated.jpg"
+        cv2.imwrite(str(gen_filename), generated_image)
+        
         # Compare images
         scores = self.comparator.compare(generated_image, target_image)
         combined_score = scores['combined']
@@ -244,6 +288,18 @@ class PromptGame:
         print(f"   - Colors: {scores['histogram']:.3f}")
         print(f"   - Edges: {scores['edges']:.3f}")
         print(f"   - Dom Colors: {scores['colors']:.3f}")
+        
+        # Show LLaVA score if available
+        if 'llava_semantic' in scores and scores['llava_semantic'] > 0:
+            print(f"   - AI Semantic: {scores['llava_semantic']:.3f}")
+            if 'llava_explanation' in scores:
+                print(f"🤖 AI Insight: {scores['llava_explanation']}")
+        
+        # Display images if visual mode is enabled
+        if self.visual_mode:
+            self.display_images(generated_image, target_image, prompt, combined_score, attempt_num)
+        else:
+            print(f"💾 Generated image saved: {gen_filename}")
         
         # Generate feedback
         feedback = self.get_feedback(combined_score, attempt_num)
@@ -287,6 +343,149 @@ class PromptGame:
 
         return response["choices"][0]["message"]["content"]
 
+    
+    def display_target_image(self):
+        """Display target image with multiple fallback methods"""
+        if not self.current_target:
+            return
+            
+        target_image = load_target_image(self.current_target['path'])
+        if target_image is None:
+            print("⚠️  Could not load target image")
+            return
+        
+        # Method 1: Try matplotlib display
+        if DISPLAY_AVAILABLE:
+            try:
+                plt.figure(figsize=(8, 6))
+                target_rgb = cv2.cvtColor(target_image, cv2.COLOR_BGR2RGB)
+                plt.imshow(target_rgb)
+                plt.title(f"🎯 TARGET: {self.current_target['name']}", 
+                         fontsize=16, fontweight='bold', pad=20)
+                plt.axis('off')
+                plt.figtext(0.5, 0.02, 
+                           "Write prompts to generate images similar to this target",
+                           ha='center', fontsize=12, style='italic')
+                plt.tight_layout()
+                plt.show()
+                print("🖼️  Target image displayed in matplotlib window!")
+                return
+            except Exception as e:
+                if self.verbose:
+                    print(f"⚠️  Matplotlib display failed: {e}")
+        
+        # Method 2: Save and open with system viewer
+        try:
+            import subprocess
+            import platform
+            
+            # Save target image to a temporary location
+            temp_target = self.generated_dir / "current_target.jpg"
+            cv2.imwrite(str(temp_target), target_image)
+            
+            # Open with system default viewer
+            system = platform.system()
+            if system == "Darwin":  # macOS
+                subprocess.run(["open", str(temp_target)], check=True)
+            elif system == "Windows":
+                subprocess.run(["start", str(temp_target)], shell=True, check=True)
+            else:  # Linux
+                subprocess.run(["xdg-open", str(temp_target)], check=True)
+            
+            print(f"🖼️  Target image opened with system viewer: {temp_target}")
+            
+        except Exception as e:
+            if self.verbose:
+                print(f"⚠️  System viewer failed: {e}")
+            print(f"💾 Target image saved to: {self.current_target['path']}")
+            print("💡 You can manually open this file to see the target image")
+    
+    def display_images(self, generated_image, target_image, prompt, score, attempt_num):
+        """Display target and generated images side by side"""
+        if not DISPLAY_AVAILABLE:
+            return
+        
+        # Save images first
+        gen_filename = self.generated_dir / f"attempt_{attempt_num:03d}_generated.jpg"
+        cv2.imwrite(str(gen_filename), generated_image)
+        
+        comparison_filename = self.generated_dir / f"attempt_{attempt_num:03d}_comparison.png"
+        
+        # Method 1: Try matplotlib display
+        if DISPLAY_AVAILABLE:
+            try:
+                plt.figure(figsize=(12, 6))
+                
+                # Convert BGR to RGB for matplotlib
+                target_rgb = cv2.cvtColor(target_image, cv2.COLOR_BGR2RGB)
+                generated_rgb = cv2.cvtColor(generated_image, cv2.COLOR_BGR2RGB)
+                
+                # Target image
+                plt.subplot(1, 2, 1)
+                plt.imshow(target_rgb)
+                plt.title("🎯 Target Image", fontsize=14, fontweight='bold')
+                plt.axis('off')
+                
+                # Generated image
+                plt.subplot(1, 2, 2)
+                plt.imshow(generated_rgb)
+                plt.title(f"🎨 Generated Image\nScore: {score:.3f}", fontsize=14, fontweight='bold')
+                plt.axis('off')
+                
+                # Add prompt as figure title
+                plt.suptitle(f"Attempt #{attempt_num}: '{prompt}'", fontsize=16, fontweight='bold')
+                plt.tight_layout()
+                
+                # Save the comparison
+                plt.savefig(str(comparison_filename), dpi=150, bbox_inches='tight')
+                
+                # Show the plot (blocking like the working local script)
+                plt.show()
+                
+                print(f"🖼️  Comparison displayed! Saved: {comparison_filename}")
+                return
+                
+            except Exception as e:
+                if self.verbose:
+                    print(f"⚠️  Matplotlib display failed: {e}")
+        
+        # Method 2: Create comparison and open with system viewer
+        try:
+            import subprocess
+            import platform
+            
+            # Create side-by-side comparison manually
+            target_rgb = cv2.cvtColor(target_image, cv2.COLOR_BGR2RGB)
+            generated_rgb = cv2.cvtColor(generated_image, cv2.COLOR_BGR2RGB)
+            
+            # Resize images to same height
+            height = 400
+            target_resized = cv2.resize(target_rgb, (int(target_rgb.shape[1] * height / target_rgb.shape[0]), height))
+            generated_resized = cv2.resize(generated_rgb, (int(generated_rgb.shape[1] * height / generated_rgb.shape[0]), height))
+            
+            # Create side-by-side image
+            comparison = np.hstack([target_resized, generated_resized])
+            comparison_bgr = cv2.cvtColor(comparison, cv2.COLOR_RGB2BGR)
+            cv2.imwrite(str(comparison_filename), comparison_bgr)
+            
+            # Open with system viewer
+            system = platform.system()
+            if system == "Darwin":  # macOS
+                subprocess.run(["open", str(comparison_filename)], check=True)
+            elif system == "Windows":
+                subprocess.run(["start", str(comparison_filename)], shell=True, check=True)
+            else:  # Linux
+                subprocess.run(["xdg-open", str(comparison_filename)], check=True)
+            
+            print(f"🖼️  Comparison opened with system viewer: {comparison_filename}")
+            
+        except Exception as e:
+            if self.verbose:
+                print(f"⚠️  System viewer failed: {e}")
+            print(f"💾 Images saved to: {self.generated_dir}")
+            print(f"💾 Generated: {gen_filename}")
+            print(f"💾 Comparison: {comparison_filename}")
+    
     def get_feedback(self, score, attempt_num):
         """Generate educational feedback"""
         if score >= 0.9:
