@@ -9,7 +9,7 @@ import json
 
 def show_available_targets():
     """Show available natural target images"""
-    targets_dir = "natural_targets"
+    targets_dir = "natural_target"
     
     if not os.path.exists(targets_dir):
         print("❌ Natural targets not found. Run: python create_natural_targets.py")
@@ -172,7 +172,7 @@ def interactive_demo():
 
 def quick_demo():
     """Quick demo with mountain sunset"""
-    target_path = "natural_targets/mountain_sunset.jpg"
+    target_path = "natural_target/mountain_sunset.jpg"
     
     if os.path.exists(target_path):
         print("🚀 Quick Demo with Mountain Sunset")

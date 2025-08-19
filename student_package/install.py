@@ -45,8 +45,8 @@ def setup_game_files():
             shutil.copy2(src, dst)
     
     # Copy natural targets
-    if os.path.exists("natural_targets"):
-        shutil.copytree("natural_targets", os.path.join(game_dir, "natural_targets"))
+    if os.path.exists("natural_target"):
+        shutil.copytree("natural_target", os.path.join(game_dir, "natural_target"))
     
     print(f"✅ Game installed to: {game_dir}")
     return game_dir

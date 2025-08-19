@@ -8,7 +8,7 @@ import os
 
 def quick_test():
     """Quick test with mountain sunset"""
-    target_path = "natural_targets/car.png"
+    target_path = "natural_target/car.png"
     
     if not os.path.exists(target_path):
         print("❌ Target not found. Run: python create_natural_targets.py")

@@ -10,7 +10,7 @@ import json
 
 def show_target_options():
     """Show available natural targets with descriptions"""
-    targets_dir = "natural_targets"
+    targets_dir = "natural_target"
     
     if not os.path.exists(targets_dir):
         print("❌ Natural targets not found. Run: python create_natural_targets.py")
