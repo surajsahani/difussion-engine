@@ -1,4 +1,3 @@
-
 """
 Image comparison module for scoring similarity
 Enhanced with LLaVA vision model for intelligent semantic comparison
@@ -9,57 +8,218 @@ import numpy as np
 import pickle
 import os
 from pathlib import Path
+from skimage.feature import hog
+from skimage.color import rgb2gray
 
 class ImageComparison:
-    """Handles image similarity comparison using multiple metrics including LLaVA"""
+    """Advanced image comparison using multiple metrics"""
     
-    def __init__(self, cache_dir="hog_cache"):
+    def __init__(self, use_llava=False, verbose=False):
+        """Initialize comparison with optional LLaVA support"""
+        self.use_llava = use_llava
+        self.verbose = verbose
+        self.llava_available = False
+        
+        # Initialize HOG descriptor for OpenCV
+        self.hog_descriptor = cv2.HOGDescriptor()
+        
+        # Import scikit-image HOG for backup
+        try:
+            from skimage.feature import hog
+            self.skimage_hog = hog
+            self.has_skimage = True
+        except ImportError:
+            self.skimage_hog = None
+            self.has_skimage = False
+            print("⚠️  scikit-image not available, using OpenCV HOG only")
+        
+        # Define weights for different similarity metrics
         self.weights = {
-            'hog_features': 0.35,    
-            'structural': 0.20,      
-            'histogram': 0.15,       
-            'edges': 0.15,           
-            'colors': 0.10,          
-            'hsv_similarity': 0.05   
+            'hog_features': 0.25,      # HOG structural features
+            'structural': 0.20,        # SSIM structural similarity  
+            'histogram': 0.20,         # Color histogram
+            'edges': 0.15,             # Edge similarity
+            'colors': 0.10,            # Dominant colors
+            'hsv_similarity': 0.10     # HSV color space
         }
         
+        # Create cache directory for HOG features
+        from pathlib import Path
+        self.cache_dir = Path.home() / ".ai-prompt-game" / "cache"
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
         
-        self.cache_dir = Path(cache_dir)
-        self.cache_dir.mkdir(exist_ok=True)
-        self.hog_cache = {}
+        # For now, we'll disable LLaVA since you're not using it
+        if self.use_llava:
+            if self.verbose:
+                print("⚠️  LLaVA not implemented, using traditional metrics")
         
-        
-        self.hog = cv2.HOGDescriptor()
-        
-    def get_hog_features(self, image):
-        """Extract HOG features for semantic texture/shape analysis"""
-        
-        resized = cv2.resize(image, (128, 128))
-        
-        
-        gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
-        
-        
-        features = self.hog.compute(gray)
-        
-        return features.flatten()
+        if self.verbose:
+            print("📊 Using traditional image comparison metrics")
+            print(f"📊 Weights: {self.weights}")
     
-    def hog_similarity(self, img1, img2):
-        """Calculate HOG feature similarity for semantic content matching"""
+    def compare(self, generated_image, target_image):
+        """
+        Compare two images and return similarity scores
         
-        hog1 = self.get_hog_features(img1)
-        hog2 = self.get_hog_features(img2)
-        
-        
-        dot_product = np.dot(hog1, hog2)
-        norm1 = np.linalg.norm(hog1)
-        norm2 = np.linalg.norm(hog2)
-        
-        if norm1 == 0 or norm2 == 0:
-            return 0.0
+        Args:
+            generated_image: Generated image (OpenCV format)
+            target_image: Target image (OpenCV format)
             
-        similarity = dot_product / (norm1 * norm2)
-        return max(0, similarity)
+        Returns:
+            dict: Similarity scores for each metric plus combined score
+        """
+        
+        if generated_image.shape != target_image.shape:
+            generated_image = cv2.resize(
+                generated_image, 
+                (target_image.shape[1], target_image.shape[0])
+            )
+        
+        
+        hog_sim = self.hog_similarity(generated_image, target_image)
+        structural_sim = self.structural_similarity(generated_image, target_image)
+        histogram_sim = self.histogram_similarity(generated_image, target_image)
+        edge_sim = self.edge_similarity(generated_image, target_image)
+        color_sim = self.dominant_color_similarity(generated_image, target_image)
+        hsv_sim = self.hsv_similarity(generated_image, target_image)
+        
+        
+        combined = (
+            hog_sim * self.weights['hog_features'] +
+            structural_sim * self.weights['structural'] +
+            histogram_sim * self.weights['histogram'] +
+            edge_sim * self.weights['edges'] +
+            color_sim * self.weights['colors'] +
+            hsv_sim * self.weights['hsv_similarity']
+        )
+        
+        return {
+            'combined': max(0, min(1, combined)),
+            'hog_features': max(0, hog_sim),
+            'structural': max(0, structural_sim),
+            'histogram': max(0, histogram_sim),
+            'edges': max(0, edge_sim),
+            'colors': max(0, color_sim),
+            'hsv_similarity': max(0, hsv_sim)
+        }
+    
+    def _calculate_traditional_metrics(self, img1, img2):
+        """Calculate traditional image similarity metrics"""
+        import cv2
+        import numpy as np
+        
+        # Convert to grayscale for structural similarity
+        gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY) if len(img1.shape) == 3 else img1
+        gray2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY) if len(img2.shape) == 3 else img2
+        
+        # Structural similarity using correlation
+        try:
+            result = cv2.matchTemplate(gray1, gray2, cv2.TM_CCOEFF_NORMED)
+            structural = float(result[0][0]) if result.size > 0 else 0.0
+            structural = max(0, min(1, structural))  # Clamp to [0,1]
+        except:
+            structural = 0.0
+        
+        # Histogram similarity
+        try:
+            if len(img1.shape) == 3:
+                hist1 = cv2.calcHist([img1], [0, 1, 2], None, [50, 50, 50], [0, 256, 0, 256, 0, 256])
+                hist2 = cv2.calcHist([img2], [0, 1, 2], None, [50, 50, 50], [0, 256, 0, 256, 0, 256])
+            else:
+                hist1 = cv2.calcHist([img1], [0], None, [256], [0, 256])
+                hist2 = cv2.calcHist([img2], [0], None, [256], [0, 256])
+            
+            histogram = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
+            histogram = max(0, min(1, histogram))
+        except:
+            histogram = 0.0
+        
+        # Edge similarity
+        try:
+            edges1 = cv2.Canny(gray1, 50, 150)
+            edges2 = cv2.Canny(gray2, 50, 150)
+            
+            # Simple edge correlation
+            edges1_norm = edges1.astype(np.float32) / 255.0
+            edges2_norm = edges2.astype(np.float32) / 255.0
+            
+            correlation = np.corrcoef(edges1_norm.flatten(), edges2_norm.flatten())[0, 1]
+            edges = max(0, min(1, correlation)) if not np.isnan(correlation) else 0.0
+        except:
+            edges = 0.0
+        
+        # Color similarity (use histogram)
+        colors = histogram
+        
+        return {
+            'structural': float(structural),
+            'histogram': float(histogram),
+            'edges': float(edges),
+            'colors': float(colors)
+        }
+
+    def get_hog_features(self, image):
+        """Extract HOG features from image"""
+        try:
+            # Convert to grayscale
+            if len(image.shape) == 3:
+                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            else:
+                gray = image
+            
+            # Use scikit-image HOG if available (more reliable)
+            if self.has_skimage:
+                features = self.skimage_hog(
+                    gray,
+                    orientations=9,
+                    pixels_per_cell=(8, 8),
+                    cells_per_block=(2, 2),
+                    visualize=False,
+                    feature_vector=True
+                )
+                return features
+            else:
+                # Fallback to OpenCV HOG
+                features = self.hog_descriptor.compute(gray)
+                return features.flatten() if features is not None else np.array([])
+                
+        except Exception as e:
+            print(f"⚠️  HOG feature extraction failed: {e}")
+            # Return empty features array as fallback
+            return np.array([])
+
+    def hog_similarity(self, img1, img2):
+        """Calculate HOG-based structural similarity"""
+        try:
+            features1 = self.get_hog_features(img1)
+            features2 = self.get_hog_features(img2)
+            
+            # Check if features were extracted successfully
+            if len(features1) == 0 or len(features2) == 0:
+                return 0.5  # Neutral score if features extraction fails
+            
+            # Ensure same feature length
+            min_len = min(len(features1), len(features2))
+            if min_len == 0:
+                return 0.5
+                
+            features1 = features1[:min_len]
+            features2 = features2[:min_len]
+            
+            # Calculate cosine similarity
+            dot_product = np.dot(features1, features2)
+            norm1 = np.linalg.norm(features1)
+            norm2 = np.linalg.norm(features2)
+            
+            if norm1 == 0 or norm2 == 0:
+                return 0.5
+                
+            similarity = dot_product / (norm1 * norm2)
+            return max(0, similarity)  # Ensure non-negative
+            
+        except Exception as e:
+            print(f"⚠️  HOG similarity calculation failed: {e}")
+            return 0.5  # Fallback score
     
     def get_cached_hog_features(self, image_path):
         """Get HOG features from cache or compute and cache them"""
@@ -135,67 +295,21 @@ class ImageComparison:
         
         lab_similarity = (l_sim * 0.4 + a_sim * 0.3 + b_sim * 0.3)
         return max(0, lab_similarity)
-
-    def compare(self, generated_image, target_image):
-        """
-        Compare two images and return similarity scores
-        
-        Args:
-            generated_image: Generated image (OpenCV format)
-            target_image: Target image (OpenCV format)
-            
-        Returns:
-            dict: Similarity scores for each metric plus combined score
-        """
-        
-        if generated_image.shape != target_image.shape:
-            generated_image = cv2.resize(
-                generated_image, 
-                (target_image.shape[1], target_image.shape[0])
-            )
-        
-        
-        hog_sim = self.hog_similarity(generated_image, target_image)
-        structural_sim = self.structural_similarity(generated_image, target_image)
-        histogram_sim = self.histogram_similarity(generated_image, target_image)
-        edge_sim = self.edge_similarity(generated_image, target_image)
-        color_sim = self.dominant_color_similarity(generated_image, target_image)
-        hsv_sim = self.hsv_similarity(generated_image, target_image)
-        
-        
-        combined = (
-            hog_sim * self.weights['hog_features'] +
-            structural_sim * self.weights['structural'] +
-            histogram_sim * self.weights['histogram'] +
-            edge_sim * self.weights['edges'] +
-            color_sim * self.weights['colors'] +
-            hsv_sim * self.weights['hsv_similarity']
-        )
-        
-        return {
-            'combined': max(0, min(1, combined)),
-            'hog_features': max(0, hog_sim),
-            'structural': max(0, structural_sim),
-            'histogram': max(0, histogram_sim),
-            'edges': max(0, edge_sim),
-            'colors': max(0, color_sim),
-            'hsv_similarity': max(0, hsv_sim)
-        }
     
     def structural_similarity(self, img1, img2):
-        """Calculate structural similarity using MSE"""
+        """Calculate structural similarity using SSIM instead of MSE"""
+        from skimage.metrics import structural_similarity as ssim
         
         gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
         gray2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
         
+        # Resize to same size if needed
+        if gray1.shape != gray2.shape:
+            gray2 = cv2.resize(gray2, (gray1.shape[1], gray1.shape[0]))
         
-        mse = np.mean((gray1.astype(float) - gray2.astype(float)) ** 2)
-        
-        
-        max_mse = 255 * 255
-        similarity = 1 - (mse / max_mse)
-        
-        return similarity
+        # Calculate SSIM (ranges from -1 to 1, where 1 is identical)
+        similarity_score = ssim(gray1, gray2)
+        return max(0, similarity_score)
     
     def histogram_similarity(self, img1, img2):
         """Calculate color histogram similarity"""
@@ -226,16 +340,23 @@ class ImageComparison:
         return combined
     
     def edge_similarity(self, img1, img2):
-        """Calculate edge pattern similarity"""
-        
+        """Calculate edge pattern similarity with better validation"""
         gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
         gray2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
-        
         
         edges1 = cv2.Canny(gray1, 50, 150)
         edges2 = cv2.Canny(gray2, 50, 150)
         
+        # Calculate edge density difference
+        density1 = np.sum(edges1 > 0) / edges1.size
+        density2 = np.sum(edges2 > 0) / edges2.size
+        density_diff = abs(density1 - density2)
         
+        # If edge densities are very different, return low score
+        if density_diff > 0.3:
+            return max(0, 0.3 - density_diff)
+        
+        # Original calculation for similar edge densities
         edge_diff = np.mean(np.abs(edges1.astype(float) - edges2.astype(float))) / 255
         similarity = 1 - edge_diff
         

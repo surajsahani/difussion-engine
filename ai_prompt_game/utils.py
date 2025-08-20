@@ -29,76 +29,88 @@ def setup_game_directory():
 
 def download_targets(game_dir):
     """Download target images for challenges"""
-    targets_dir = game_dir / "targets"
-    
-    # Define target images with their URLs and metadata
     targets = [
         {
+            "id": "cat",
+            "name": "Cat",
+            "difficulty": "Easy",
+            "description": "A cute cat portrait",
+            "url": "https://cdn.pixabay.com/photo/2024/08/30/10/14/cat-9009011_1280.jpg",
+            "filename": "cat.jpg",
+            "hints": [
+                "Describe the cat's features and expression",
+                "Mention the lighting and background",
+                "Include details about fur texture and colors"
+            ]
+        },
+        {
             "id": "car",
-            "name": "car",
-            "difficulty": "Hard",
-            "description": "A bear driving car",
+            "name": "Car", 
+            "difficulty": "Medium",
+            "description": "Cute bear driving a toy car illustration",
             "url": "https://images.unsplash.com/photo-1755593853479-10550d810c22?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
             "filename": "car.png",
             "hints": [
-                "Cute bear driving a toy car illustration.",
-                "Retro flat design cartoon vehicle with animal driver.",
-                "Minimal playful vector art of bear in car."
+                "Cute bear driving a toy car illustration",
+                "Retro flat design cartoon vehicle with animal driver",
+                "Minimal playful vector art of bear in car"
             ]
         },
         {
             "id": "foxes",
             "name": "Foxes",
-            "difficulty": "Medium",
+            "difficulty": "Medium", 
             "description": "Two cute foxes sitting on tree",
             "url": "https://cdn.pixabay.com/photo/2022/12/04/00/42/foxes-7633559_1280.png",
             "filename": "foxes.png",
             "hints": [
-                "Create Two Foxes setting on tree",
-                "Two cute Foxes setting on tree"
-                                        ]
-        },
-        {
-            "id": "LLama",
-            "name": "LLama",
-            "difficulty": "Medium",
-            "description": "A sheep in snow fall",
-            "url": "https://images.unsplash.com/photo-1755590764677-68c742d97e8f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwcm9maWxlLXBhZ2V8MXx8fGVufDB8fHx8fA%3D%3D",
-            "filename": "llama.jpg",
-            "hints": [
-                "Mention the atmospheric mist",
-                "Describe the forest path",
-                "Include the soft, diffused lighting"
+                "Two foxes sitting on tree branch",
+                "Cute animal illustration style",
+                "Natural forest setting"
             ]
         },
         {
-            "id": "van",
-            "name": "Van",
-            "difficulty": "Easy",
-            "description": "A van climbling mountain beside ocean",
-            "url": "https://images.unsplash.com/photo-1755590764782-d55944ec0a61?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwcm9maWxlLXBhZ2V8Mnx8fGVufDB8fHx8fA%3D%3D",
-            "filename": "van.jpg",
+            "id": "llama",
+            "name": "Llama",
+            "difficulty": "Medium",
+            "description": "A llama portrait", 
+            "url": "https://images.unsplash.com/photo-1755590764677-68c742d97e8f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwcm9maWxlLXBhZ2V8MXx8fGVufDB8fHx8fA%3D%3D",
+            "filename": "llama.jpg",
             "hints": [
-                "Van climbing a mountain",
-                "Create a illustration of blue van",
-                "Can Climbing a mountain besides ocean"
+                "Llama portrait with detailed features",
+                "Natural outdoor setting",
+                "Focus on the animal's expression"
             ]
         },
         {
             "id": "owl",
-            "name": "owl",
+            "name": "Owl",
             "difficulty": "Hard",
-            "description": "owl illlustration",
-            "url": "https://cdn.pixabay.com/photo/2022/12/04/00/01/owl-7633529_1280.png",
-            "filename": "owl.png",
+            "description": "An owl portrait",
+            "url": "https://images.unsplash.com/photo-1593642532973-d31b6557fa68?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwcm9maWxlLXBhZ2V8MXx8fGVufDB8fHx8fA%3D%3D",
+            "filename": "owl.jpg", 
             "hints": [
-                "Describe the colorful aurora lights",
-                "Mention the snowy landscape",
-                "Include the dancing/flowing motion"
+                "Detailed owl features and feathers",
+                "Focus on the eyes and beak",
+                "Natural wildlife photography style"
+            ]
+        },
+        {
+            "id": "coffee",  # Changed from "Coffee" to match naming convention
+            "name": "Coffee",  # Capitalized display name
+            "difficulty": "Easy",
+            "description": "A coffee cup with latte art",
+            "url": "https://cdn.pixabay.com/photo/2024/08/03/02/32/drink-8941028_1280.png", 
+            "filename": "coffee.jpg",  # Changed from "van.jpg" to "coffee.jpg"
+            "hints": [
+                "Coffee cup with foam art design",  # Updated hints to match coffee
+                "Describe the latte art pattern and cup style",
+                "Include details about the drink and presentation"
             ]
         }
     ]
     
+    targets_dir = game_dir / "targets"
     downloaded_targets = []
     
     for target in targets:
