@@ -9,6 +9,7 @@ import numpy as np
 import pickle
 import os
 from pathlib import Path
+from PIL import Image
 
 class ImageComparison:
     """Handles image similarity comparison using multiple metrics including LLaVA"""

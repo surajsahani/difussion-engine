@@ -53,7 +53,7 @@ class PromptGame:
         
         # Initialize components
         self.generator = ImageGenerator(model_type)
-        self.comparator = ImageComparison(use_llava=use_llava)
+        self.comparator = ImageComparison()
         
         # Game state
         self.current_target = None
@@ -88,10 +88,16 @@ class PromptGame:
         
         # Game loop
         while True:
-            try:
+            try:              
+                if len(self.attempts) == 3:
+                    if self.best_score > 0.8:
+                        self.end_session(victory=True)
+                    else:
+                        self.end_session()
+                    break  
                 prompt = input(f"\n[Attempt #{len(self.attempts) + 1}] Your prompt: ").strip()
                 
-                if prompt.lower() == 'quit':
+                if prompt.lower() == 'quit' or prompt.lower() == 'exit' or prompt.lower() == 'end':
                     self.end_session()
                     break
                 elif prompt.lower() == 'progress':
@@ -235,9 +241,10 @@ class PromptGame:
             print("💡 Hints:")
             for hint in self.current_target['hints'][:2]:  # Show first 2 hints
                 print(f"   • {hint}")
+    
     def speak_feedback(self,feedback_text):
         engine = pyttsx3.init()
-        engine.setProperty('rate', 160)  # speed of speech
+        engine.setProperty('rate', 200)  # speed of speech
         engine.setProperty('volume', 1)  # volume (0.0 to 1.0)
         engine.say(feedback_text)
         engine.runAndWait()
@@ -334,7 +341,7 @@ class PromptGame:
             "messages": [
                 {
                     "role": "user",
-                    "content": "You are a motivational speaker. The player has a current score of {score} and has attempted {attempt_num} times. Give them exactly 2 short, powerful, and inspiring sentences that motivate them to keep playing and give their best effort."
+                    "content": f"You are a motivational speaker. If {attempt_num} is 2 This is the last attempt ask to give there best. If it is {attempt_num} is more then 2 give them a motivation to play again. The player has a current score of {score} and has attempted {attempt_num} times. Give them exactly 2 short, powerful, and inspiring sentences that motivate them to keep playing and give their best effort."
 
                 }
             ],
