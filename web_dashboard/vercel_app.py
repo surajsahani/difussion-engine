@@ -11,6 +11,7 @@ from PIL import Image
 import json
 from datetime import datetime
 import requests
+import numpy as np
 
 app = Flask(__name__)
 app.secret_key = 'ai-prompt-game-vercel-2024'
