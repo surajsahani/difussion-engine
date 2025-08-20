@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-✨ Prompt Princess - AI Art Challenge Game ✨
-A magical journey into AI prompt engineering for creative minds!
+🎨 AI Prompt Studio - Creative Learning Platform
+An engaging platform for mastering AI prompt engineering through interactive challenges
 """
 
 import streamlit as st
@@ -14,172 +14,164 @@ import time
 
 # Page config
 st.set_page_config(
-    page_title="✨ Prompt Princess - AI Art Challenge",
-    page_icon="👑",
+    page_title="🎨 AI Prompt Studio - Creative Learning",
+    page_icon="🎨",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS with magical girl theme
+# Modern, professional CSS with subtle gamification
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&family=Quicksand:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
     
     .stApp {
-        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
-        font-family: 'Quicksand', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        font-family: 'Inter', sans-serif;
     }
     
     .main-header {
         text-align: center;
-        padding: 2rem;
-        background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
-        color: white;
-        border-radius: 20px;
+        padding: 2.5rem;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
         margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(255, 107, 157, 0.3);
-        border: 3px solid #fff;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
     
-    .princess-title {
-        font-family: 'Comfortaa', cursive;
-        font-size: 3rem;
-        font-weight: 700;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    .studio-title {
+        font-family: 'Poppins', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         margin-bottom: 0.5rem;
     }
     
     .subtitle {
-        font-size: 1.2rem;
-        opacity: 0.9;
-        font-weight: 500;
+        font-size: 1.1rem;
+        color: #64748b;
+        font-weight: 400;
     }
     
-    .level-badge {
-        background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-        color: #333;
+    .progress-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
         padding: 0.5rem 1rem;
-        border-radius: 25px;
-        font-weight: 600;
+        border-radius: 12px;
+        font-weight: 500;
         display: inline-block;
-        margin: 0.5rem;
-        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
-        border: 2px solid #fff;
+        margin: 0.25rem;
+        font-size: 0.9rem;
     }
     
-    .xp-bar {
-        background: rgba(255,255,255,0.3);
-        border-radius: 15px;
-        height: 20px;
+    .progress-bar {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        height: 8px;
         margin: 1rem 0;
         overflow: hidden;
-        border: 2px solid #fff;
     }
     
-    .xp-fill {
-        background: linear-gradient(90deg, #ff6b9d 0%, #ffd700 100%);
+    .progress-fill {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         height: 100%;
-        border-radius: 13px;
+        border-radius: 8px;
         transition: width 0.5s ease;
     }
     
     .challenge-card {
-        background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
         padding: 1.5rem;
-        border-radius: 20px;
-        border: 3px solid #fff;
-        margin: 0.5rem 0;
-        text-align: center;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin: 0.75rem 0;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 8px 25px rgba(255, 154, 158, 0.3);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
     
     .challenge-card:hover {
-        transform: translateY(-5px) scale(1.02);
-        box-shadow: 0 15px 35px rgba(255, 154, 158, 0.4);
-        border-color: #ff6b9d;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        border-color: #667eea;
     }
     
     .challenge-card.active {
-        background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        transform: scale(1.05);
-        border-color: #ffd700;
+        transform: translateY(-2px);
+        border-color: #667eea;
     }
     
-    .score-container {
-        background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
-        color: white;
+    .results-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
         padding: 2rem;
-        border-radius: 25px;
-        text-align: center;
+        border-radius: 16px;
         margin: 1rem 0;
-        border: 3px solid #fff;
-        box-shadow: 0 10px 30px rgba(255, 107, 157, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
     
-    .achievement-popup {
-        background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-        color: #333;
-        padding: 1rem;
-        border-radius: 15px;
-        margin: 1rem 0;
-        text-align: center;
-        border: 3px solid #fff;
-        box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
-        animation: bounce 0.6s ease-in-out;
-    }
-    
-    @keyframes bounce {
-        0%, 20%, 60%, 100% { transform: translateY(0); }
-        40% { transform: translateY(-10px); }
-        80% { transform: translateY(-5px); }
-    }
-    
-    .sparkle {
-        animation: sparkle 1.5s ease-in-out infinite;
-    }
-    
-    @keyframes sparkle {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.7; transform: scale(1.1); }
-    }
-    
-    .cute-button {
-        background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+    .achievement-notification {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         color: white;
-        border: 3px solid #fff;
-        border-radius: 25px;
-        padding: 1rem 2rem;
-        font-size: 1.1rem;
-        font-weight: 600;
+        padding: 1rem;
+        border-radius: 12px;
+        margin: 1rem 0;
+        text-align: center;
+        animation: slideIn 0.5s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .image-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .metric-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .info-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-left: 4px solid #667eea;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
-        font-family: 'Quicksand', sans-serif;
     }
     
-    .cute-button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 35px rgba(255, 107, 157, 0.4);
-    }
-    
-    .image-frame {
-        border: 4px solid #fff;
-        border-radius: 20px;
-        box-shadow: 0 8px 25px rgba(255, 154, 158, 0.3);
-        background: linear-gradient(135deg, #ffeef8 0%, #fff 100%);
-        padding: 1rem;
-    }
-    
-    .stats-card {
-        background: linear-gradient(135deg, #ffeef8 0%, #fff 100%);
-        border: 3px solid #ff9a9e;
-        border-radius: 15px;
-        padding: 1rem;
-        margin: 0.5rem 0;
-        text-align: center;
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -208,14 +200,14 @@ if 'streak' not in st.session_state:
 if 'princess_name' not in st.session_state:
     st.session_state.princess_name = ""
 
-# Achievement system
+# Achievement system for educational engagement
 ACHIEVEMENTS = {
-    'first_try': {'name': '✨ First Magic Spell', 'desc': 'Generated your first image!', 'xp': 50},
-    'good_score': {'name': '🌟 Rising Star', 'desc': 'Scored above 0.7!', 'xp': 100},
-    'perfect_score': {'name': '👑 Prompt Princess', 'desc': 'Scored above 0.9!', 'xp': 200},
-    'five_attempts': {'name': '🎨 Creative Explorer', 'desc': 'Made 5 attempts!', 'xp': 75},
-    'streak_3': {'name': '🔥 On Fire', 'desc': '3 good scores in a row!', 'xp': 150},
-    'all_challenges': {'name': '🏆 Challenge Master', 'desc': 'Tried all challenges!', 'xp': 300}
+    'first_try': {'name': '🎯 First Generation', 'desc': 'Successfully generated your first AI image', 'xp': 50},
+    'good_score': {'name': '📈 Proficient Prompter', 'desc': 'Achieved similarity score above 0.7', 'xp': 100},
+    'perfect_score': {'name': '🏆 Expert Prompter', 'desc': 'Achieved similarity score above 0.9', 'xp': 200},
+    'five_attempts': {'name': '🔄 Persistent Learner', 'desc': 'Completed 5 prompt iterations', 'xp': 75},
+    'streak_3': {'name': '🎯 Consistent Performance', 'desc': 'Achieved 3 consecutive good scores', 'xp': 150},
+    'all_challenges': {'name': '🌟 Challenge Completionist', 'desc': 'Attempted all available challenges', 'xp': 300}
 }
 
 def calculate_level(xp):
@@ -223,20 +215,20 @@ def calculate_level(xp):
     return min(10, max(1, int(xp / 100) + 1))
 
 def get_level_title(level):
-    """Get cute title based on level"""
+    """Get professional title based on level"""
     titles = {
-        1: "✨ Apprentice Dreamer",
-        2: "🌸 Budding Artist", 
-        3: "🎨 Creative Spark",
-        4: "🌟 Rising Star",
-        5: "💫 Imagination Queen",
-        6: "🦄 Unicorn Whisperer",
-        7: "👑 Prompt Princess",
-        8: "🌈 Rainbow Weaver",
-        9: "✨ Magic Master",
-        10: "🏆 Legendary Creator"
+        1: "🌱 Novice Prompter",
+        2: "📝 Learning Writer", 
+        3: "🎨 Creative Thinker",
+        4: "📈 Skilled Prompter",
+        5: "🎯 Advanced Creator",
+        6: "🌟 Expert Prompter",
+        7: "🏆 Master Creator",
+        8: "💎 Elite Prompter",
+        9: "🚀 Prompt Specialist",
+        10: "👑 AI Art Director"
     }
-    return titles.get(level, "✨ Magical Creator")
+    return titles.get(level, "🎨 Creative Professional")
 
 def award_achievement(achievement_key):
     """Award achievement if not already earned"""
@@ -326,12 +318,12 @@ TARGET_IMAGES_B64 = {
 def get_target_image(challenge_id):
     """Get or generate target image for a challenge"""
     target_prompts = {
-        'unicorn': 'a beautiful white unicorn with rainbow mane in magical forest, fantasy art, sparkles and glitter',
-        'princess': 'a beautiful princess in pink dress with tiara, fairy tale style, magical castle background',
-        'butterfly': 'colorful butterflies with rainbow wings flying in flower garden, magical and dreamy',
-        'flowers': 'beautiful pink and purple flowers in magical garden, soft lighting, fairy tale style',
-        'castle': 'a magical fairy tale castle with pink towers, rainbow bridge, fantasy architecture',
-        'mermaid': 'a beautiful mermaid with long flowing hair underwater, magical sea creatures, coral reef'
+        'portrait': 'professional headshot of a young woman, natural lighting, neutral background, realistic photography',
+        'landscape': 'serene mountain landscape at sunset, golden hour lighting, peaceful lake reflection, nature photography',
+        'architecture': 'modern minimalist building with clean lines, glass facade, urban architecture photography',
+        'abstract': 'abstract geometric composition with flowing colors, modern digital art, balanced composition',
+        'still_life': 'elegant still life with fruits and flowers on wooden table, soft natural lighting, artistic arrangement',
+        'fantasy': 'mystical forest scene with ethereal lighting, fantasy landscape, magical atmosphere, digital art'
     }
     
     try:
@@ -344,12 +336,12 @@ def get_target_image(challenge_id):
     
     # Fallback: create a themed placeholder
     colors = {
-        'unicorn': (255, 192, 203),  # Pink
-        'princess': (255, 182, 193),  # Light pink
-        'butterfly': (255, 105, 180),  # Hot pink
-        'flowers': (255, 20, 147),   # Deep pink
-        'castle': (186, 85, 211),    # Medium orchid
-        'mermaid': (72, 209, 204)    # Medium turquoise
+        'portrait': (139, 128, 116),   # Warm brown
+        'landscape': (70, 130, 180),   # Steel blue
+        'architecture': (105, 105, 105), # Dim gray
+        'abstract': (138, 43, 226),    # Blue violet
+        'still_life': (160, 82, 45),   # Saddle brown
+        'fantasy': (75, 0, 130)        # Indigo
     }
     
     # Create a simple colored image with text
@@ -360,33 +352,33 @@ def get_target_image(challenge_id):
 if not st.session_state.princess_name:
     st.markdown("""
     <div class="main-header">
-        <div class="princess-title">👑 Welcome to Prompt Princess! ✨</div>
-        <p class="subtitle">Where creativity meets AI magic! 🌈</p>
+        <div class="studio-title">🎨 AI Prompt Studio</div>
+        <p class="subtitle">Master the art of AI prompt engineering through interactive challenges</p>
     </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("### 💫 What should we call you, future Prompt Princess?")
-    name_input = st.text_input("Enter your magical name:", placeholder="Princess Aurora, Creative Queen, etc.")
+    st.markdown("### 👋 Welcome! What should we call you?")
+    name_input = st.text_input("Enter your name:", placeholder="Your name or preferred username")
     
-    if st.button("🌟 Begin My Magical Journey!", key="start_journey"):
+    if st.button("🚀 Start Learning", key="start_journey"):
         if name_input:
             st.session_state.princess_name = name_input
             st.rerun()
         else:
-            st.warning("Please enter your magical name first! ✨")
+            st.warning("Please enter your name to get started!")
     
     st.markdown("""
-    <div style="text-align: center; margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #ffeef8 0%, #fff 100%); border-radius: 15px; border: 3px solid #ff9a9e;">
-        <h3>🎮 How to Play</h3>
-        <p>🎯 Choose a magical challenge<br>
-        ✍️ Write creative prompts to generate images<br>
-        🏆 Earn XP and unlock achievements<br>
-        👑 Level up to become the ultimate Prompt Princess!</p>
+    <div class="info-card">
+        <h3>📚 Learning Objectives</h3>
+        <p><strong>🎯 Master AI Prompt Engineering:</strong> Learn to craft effective prompts for AI image generation<br>
+        <strong>📈 Develop Creative Skills:</strong> Enhance your descriptive writing and visual thinking<br>
+        <strong>🔄 Practice Iterative Design:</strong> Understand the importance of refinement and feedback<br>
+        <strong>🏆 Track Your Progress:</strong> Monitor improvement through scoring and achievements</p>
     </div>
     """, unsafe_allow_html=True)
     st.stop()
 
-# Main header with player stats
+# Main header with student progress
 current_level = calculate_level(st.session_state.total_xp)
 level_title = get_level_title(current_level)
 xp_for_next_level = (current_level * 100) - st.session_state.total_xp
@@ -394,27 +386,27 @@ xp_progress = (st.session_state.total_xp % 100) / 100
 
 st.markdown(f"""
 <div class="main-header">
-    <div class="princess-title">👑 {st.session_state.princess_name} ✨</div>
+    <div class="studio-title">Welcome back, {st.session_state.princess_name}! 🎨</div>
     <p class="subtitle">{level_title} • Level {current_level}</p>
-    <div class="level-badge">💎 {st.session_state.total_xp} XP</div>
-    <div class="level-badge">🔥 {st.session_state.streak} Streak</div>
-    <div class="xp-bar">
-        <div class="xp-fill" style="width: {xp_progress * 100}%"></div>
+    <div class="progress-badge">📊 {st.session_state.total_xp} XP</div>
+    <div class="progress-badge">🎯 {st.session_state.streak} Streak</div>
+    <div class="progress-bar">
+        <div class="progress-fill" style="width: {xp_progress * 100}%"></div>
     </div>
-    <small>{100 - (st.session_state.total_xp % 100)} XP to next level!</small>
+    <small style="color: #64748b;">{100 - (st.session_state.total_xp % 100)} XP to next level</small>
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar - Challenge Selection with cute theme
-st.sidebar.markdown("### 🌟 Magical Challenges")
+# Sidebar - Challenge Selection with educational focus
+st.sidebar.markdown("### 📚 Learning Challenges")
 
 challenges = [
-    {'id': 'unicorn', 'name': 'Unicorn', 'difficulty': 'Dreamy', 'threshold': 0.65, 'emoji': '🦄', 'desc': 'Create a magical unicorn!'},
-    {'id': 'princess', 'name': 'Princess', 'difficulty': 'Royal', 'threshold': 0.60, 'emoji': '👸', 'desc': 'Design a beautiful princess!'},
-    {'id': 'butterfly', 'name': 'Butterfly', 'difficulty': 'Gentle', 'threshold': 0.65, 'emoji': '🦋', 'desc': 'Paint colorful butterflies!'},
-    {'id': 'flowers', 'name': 'Flowers', 'difficulty': 'Blooming', 'threshold': 0.60, 'emoji': '🌸', 'desc': 'Grow a magical garden!'},
-    {'id': 'castle', 'name': 'Castle', 'difficulty': 'Majestic', 'threshold': 0.55, 'emoji': '🏰', 'desc': 'Build a fairy tale castle!'},
-    {'id': 'mermaid', 'name': 'Mermaid', 'difficulty': 'Mystical', 'threshold': 0.50, 'emoji': '🧜‍♀️', 'desc': 'Dive into underwater magic!'}
+    {'id': 'portrait', 'name': 'Portrait', 'difficulty': 'Beginner', 'threshold': 0.65, 'emoji': '👤', 'desc': 'Practice describing human features and expressions'},
+    {'id': 'landscape', 'name': 'Landscape', 'difficulty': 'Beginner', 'threshold': 0.60, 'emoji': '🏞️', 'desc': 'Learn to describe natural environments'},
+    {'id': 'architecture', 'name': 'Architecture', 'difficulty': 'Intermediate', 'threshold': 0.55, 'emoji': '🏛️', 'desc': 'Master structural and design elements'},
+    {'id': 'abstract', 'name': 'Abstract Art', 'difficulty': 'Intermediate', 'threshold': 0.50, 'emoji': '🎨', 'desc': 'Explore creative and conceptual descriptions'},
+    {'id': 'still_life', 'name': 'Still Life', 'difficulty': 'Advanced', 'threshold': 0.60, 'emoji': '🍎', 'desc': 'Focus on texture, lighting, and composition'},
+    {'id': 'fantasy', 'name': 'Fantasy Scene', 'difficulty': 'Advanced', 'threshold': 0.45, 'emoji': '🐉', 'desc': 'Combine imagination with technical precision'}
 ]
 
 # Show achievements in sidebar
@@ -449,77 +441,83 @@ for challenge in challenges:
     st.sidebar.caption(f"💫 {challenge['desc']}")
     st.sidebar.markdown("---")
 
-# Main content with magical styling
+# Main content with professional styling
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown("### 🎯 Magical Target")
+    st.markdown("### 🎯 Target Reference")
     if st.session_state.target_image:
-        st.markdown('<div class="image-frame">', unsafe_allow_html=True)
-        st.image(st.session_state.target_image, caption="✨ Create something like this!", use_column_width=True)
+        st.markdown('<div class="image-container">', unsafe_allow_html=True)
+        st.image(st.session_state.target_image, caption="Reference image to match", use_column_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
         if st.session_state.current_challenge:
             st.markdown(f"""
-            <div class="stats-card">
+            <div class="info-card">
                 <strong>{st.session_state.current_challenge['emoji']} {st.session_state.current_challenge['name']} Challenge</strong><br>
-                <small>Difficulty: {st.session_state.current_challenge['difficulty']} ✨</small><br>
-                <small>Target Score: {st.session_state.current_challenge['threshold']:.2f} 🎯</small>
+                <small><strong>Difficulty:</strong> {st.session_state.current_challenge['difficulty']}</small><br>
+                <small><strong>Target Score:</strong> {st.session_state.current_challenge['threshold']:.2f}</small><br>
+                <small><strong>Learning Focus:</strong> {st.session_state.current_challenge['desc']}</small>
             </div>
             """, unsafe_allow_html=True)
     else:
         st.markdown("""
-        <div class="image-frame" style="height: 300px; display: flex; align-items: center; justify-content: center;">
-            <div style="text-align: center;">
-                <h3>🌟 Choose Your Adventure!</h3>
-                <p>Select a magical challenge from the sidebar to begin your creative journey! ✨</p>
+        <div class="image-container" style="height: 300px; display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center; color: #64748b;">
+                <h3>📚 Select a Challenge</h3>
+                <p>Choose a learning challenge from the sidebar to begin practicing your prompt engineering skills.</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
 with col2:
-    st.markdown("### 🎨 Your Creation")
+    st.markdown("### 🎨 Your Generated Image")
     if st.session_state.generated_image:
-        st.markdown('<div class="image-frame">', unsafe_allow_html=True)
-        st.image(st.session_state.generated_image, caption="🌟 Your magical creation!", use_column_width=True)
+        st.markdown('<div class="image-container">', unsafe_allow_html=True)
+        st.image(st.session_state.generated_image, caption="Your AI-generated result", use_column_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
     else:
         st.markdown("""
-        <div class="image-frame" style="height: 300px; display: flex; align-items: center; justify-content: center;">
-            <div style="text-align: center;">
-                <h3>✨ Magic Awaits!</h3>
-                <p>Write a creative prompt below to bring your imagination to life! 🦄</p>
+        <div class="image-container" style="height: 300px; display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center; color: #64748b;">
+                <h3>✍️ Ready to Create</h3>
+                <p>Write a descriptive prompt below to generate an AI image and see how well it matches the target.</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-# Prompt input with magical styling
-st.markdown("### 💫 Cast Your Creative Spell")
+# Prompt input with educational focus
+st.markdown("### ✍️ Craft Your Prompt")
 prompt = st.text_area(
-    "✍️ Describe your magical vision...",
-    placeholder="Be as creative as possible! Describe colors, magical elements, style, mood... ✨\nExample: 'A beautiful unicorn with rainbow mane dancing in a field of glittering flowers under starlight'",
+    "Describe the image you want to generate:",
+    placeholder="Write a detailed, descriptive prompt. Include specific details about:\n• Subject and composition\n• Colors and lighting\n• Style and mood\n• Background and setting\n\nExample: 'A professional portrait of a young woman with natural lighting, soft shadows, neutral background, realistic photography style'",
     height=120,
     disabled=st.session_state.current_challenge is None
 )
 
-# Helpful prompt tips
+# Educational prompt tips
 if st.session_state.current_challenge:
     challenge_tips = {
-        'unicorn': "💡 Try: 'magical', 'rainbow mane', 'sparkles', 'enchanted forest'",
-        'princess': "💡 Try: 'elegant gown', 'tiara', 'royal', 'fairy tale castle'", 
-        'butterfly': "💡 Try: 'colorful wings', 'flower garden', 'delicate', 'rainbow colors'",
-        'flowers': "💡 Try: 'blooming', 'vibrant colors', 'magical garden', 'soft petals'",
-        'castle': "💡 Try: 'fairy tale', 'towers', 'magical', 'enchanted kingdom'",
-        'mermaid': "💡 Try: 'underwater', 'flowing hair', 'coral reef', 'ocean magic'"
+        'portrait': "💡 Focus on: facial features, lighting, expression, background, photography style",
+        'landscape': "💡 Focus on: natural elements, time of day, weather, perspective, composition", 
+        'architecture': "💡 Focus on: building style, materials, angles, lighting, urban context",
+        'abstract': "💡 Focus on: colors, shapes, patterns, composition, artistic movement",
+        'still_life': "💡 Focus on: objects, arrangement, lighting, textures, artistic style",
+        'fantasy': "💡 Focus on: imaginative elements, atmosphere, magical details, artistic style"
     }
-    st.caption(challenge_tips.get(st.session_state.current_challenge['id'], "💡 Be creative and descriptive!"))
+    st.markdown(f"""
+    <div class="info-card">
+        <strong>Prompt Writing Tips:</strong><br>
+        {challenge_tips.get(st.session_state.current_challenge['id'], "💡 Be specific and descriptive!")}
+    </div>
+    """, unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
-    if st.button("🌟 Create Magic!", 
+    if st.button("🚀 Generate Image", 
                  disabled=not prompt or st.session_state.current_challenge is None,
                  use_container_width=True):
         
-        with st.spinner("✨ Weaving your magical creation... 🌟"):
+        with st.spinner("🎨 Generating your image and analyzing results..."):
             # Generate image
             generated_image = generator.generate(prompt)
             
@@ -566,7 +564,7 @@ with col2:
                 
                 st.rerun()
 
-# Results with magical celebration
+# Results with educational focus
 if st.session_state.scores:
     scores = st.session_state.scores
     threshold = st.session_state.current_challenge['threshold']
@@ -586,111 +584,115 @@ if st.session_state.scores:
     for achievement_key in new_achievements:
         achievement = ACHIEVEMENTS[achievement_key]
         st.markdown(f"""
-        <div class="achievement-popup sparkle">
-            <h3>🎉 Achievement Unlocked! 🎉</h3>
-            <h2>{achievement['name']}</h2>
-            <p>{achievement['desc']}</p>
-            <p><strong>+{achievement['xp']} XP!</strong></p>
+        <div class="achievement-notification">
+            <h4>🏆 Achievement Unlocked!</h4>
+            <strong>{achievement['name']}</strong><br>
+            <small>{achievement['desc']}</small><br>
+            <strong>+{achievement['xp']} XP Earned</strong>
         </div>
         """, unsafe_allow_html=True)
         st.session_state.shown_achievements.append(achievement_key)
-        time.sleep(0.1)  # Small delay for effect
     
-    # Main score display with celebration
-    celebration_emoji = "🎉" if passed else "💫"
-    score_color = "#ffd700" if passed else "#ff6b9d"
+    # Main score display
+    status_color = "#10b981" if passed else "#667eea"
     
     st.markdown(f"""
-    <div class="score-container">
-        <h2>{celebration_emoji} Your Magic Score {celebration_emoji}</h2>
-        <h1 style="font-size: 4rem; margin: 1rem 0; color: {score_color};">{scores['combined']:.3f}</h1>
-        <p style="font-size: 1.2rem;">Target: {threshold:.3f} • Earned: +{xp_earned} XP ✨</p>
+    <div class="results-container">
+        <h2 style="text-align: center; color: {status_color};">📊 Similarity Analysis</h2>
+        <h1 style="font-size: 3rem; margin: 1rem 0; text-align: center; color: {status_color};">{scores['combined']:.3f}</h1>
+        <p style="font-size: 1.1rem; text-align: center; color: #64748b;">Target: {threshold:.3f} • XP Earned: +{xp_earned}</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Detailed scores with cute labels
-    st.markdown("### 🌟 Magical Analysis")
+    # Detailed scores with educational labels
+    st.markdown("### 📈 Detailed Performance Metrics")
     
     score_cols = st.columns(5)
     score_names = ['perceptual', 'semantic', 'structural', 'color_advanced', 'texture']
-    score_labels = ['👁️ Visual', '🧠 Meaning', '🏗️ Structure', '🎨 Colors', '✨ Texture']
+    score_labels = ['👁️ Visual Match', '🧠 Semantic Similarity', '🏗️ Structural Alignment', '🎨 Color Accuracy', '✨ Texture Quality']
     
     for i, (name, label) in enumerate(zip(score_names, score_labels)):
         with score_cols[i]:
             score_val = scores[name]
-            color = "#ffd700" if score_val > 0.7 else "#ff6b9d" if score_val > 0.5 else "#ffa8a8"
             st.markdown(f"""
-            <div class="stats-card" style="border-color: {color};">
+            <div class="metric-card">
                 <strong>{label}</strong><br>
-                <span style="font-size: 1.5rem; color: {color};">{score_val:.3f}</span>
+                <span style="font-size: 1.4rem; color: #667eea;">{score_val:.3f}</span>
             </div>
             """, unsafe_allow_html=True)
     
-    # Magical feedback
-    st.markdown("### 💫 Princess Feedback")
+    # Educational feedback
+    st.markdown("### 💡 Learning Feedback")
     
     if passed:
-        celebration_messages = [
-            "🎉 Absolutely magical! You're becoming a true Prompt Princess!",
-            "✨ Stunning work! Your creativity is shining bright!",
-            "👑 Royal achievement! You've mastered this challenge!",
-            "🌟 Incredible! Your imagination knows no bounds!"
+        success_messages = [
+            "🎯 Excellent work! Your prompt successfully captured the key elements of the target image.",
+            "📈 Great job! You've demonstrated strong prompt engineering skills.",
+            "🌟 Well done! Your descriptive language effectively guided the AI generation.",
+            "🏆 Outstanding! You've achieved the learning objective for this challenge."
         ]
-        st.success(random.choice(celebration_messages))
+        st.success(random.choice(success_messages))
     else:
-        encouragement_messages = [
-            "💫 You're on the right path! Keep experimenting with your prompts!",
-            "🌸 Almost there! Try adding more magical details!",
-            "✨ Great effort! Every attempt makes you stronger!",
-            "🦄 Don't give up! The perfect prompt is within reach!"
+        improvement_messages = [
+            "📚 Good attempt! Consider adding more specific details about the subject and composition.",
+            "🔄 Keep practicing! Try to be more descriptive about colors, lighting, and style.",
+            "💪 You're learning! Each iteration helps you understand AI prompt engineering better.",
+            "🎯 Almost there! Focus on the key visual elements that define the target image."
         ]
-        st.info(random.choice(encouragement_messages))
+        st.info(random.choice(improvement_messages))
     
-    # Helpful tips based on score
+    # Specific improvement suggestions
     if scores['combined'] < 0.5:
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #ffeef8 0%, #fff 100%); padding: 1rem; border-radius: 15px; border: 2px solid #ff9a9e; margin: 1rem 0;">
-            <h4>💡 Magical Tips for Better Results:</h4>
+        <div class="info-card">
+            <h4>📝 Prompt Improvement Strategies:</h4>
             <ul>
-                <li>🎨 Be more specific about colors and style</li>
-                <li>✨ Add magical elements like 'sparkles', 'glowing', 'enchanted'</li>
-                <li>🌈 Describe the mood and atmosphere</li>
-                <li>👑 Include details about the setting and background</li>
+                <li><strong>Be More Specific:</strong> Include detailed descriptions of colors, lighting, and composition</li>
+                <li><strong>Add Style Keywords:</strong> Mention artistic style, photography type, or rendering technique</li>
+                <li><strong>Describe the Mood:</strong> Include atmospheric and emotional descriptors</li>
+                <li><strong>Technical Details:</strong> Specify camera angles, focal length, or artistic medium</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
     
-    # Progress towards next level
+    # Progress tracking
     current_level = calculate_level(st.session_state.total_xp)
     xp_for_next = (current_level * 100) - st.session_state.total_xp
     if xp_for_next > 0:
-        st.info(f"🌟 {xp_for_next} more XP needed to reach Level {current_level + 1}!")
+        st.info(f"📊 Progress Update: {xp_for_next} more XP needed to reach Level {current_level + 1}")
 
-# Instructions with magical theme
-with st.expander("📚 Princess Guide - How to Play"):
+# Instructions with educational focus
+with st.expander("📚 Learning Guide - How to Use AI Prompt Studio"):
     st.markdown("""
-    ### 🌟 Your Magical Journey
+    ### 🎯 Learning Process
     
-    1. **👑 Choose Your Quest**: Pick a magical challenge from the sidebar
-    2. **✍️ Cast Your Spell**: Write creative prompts to describe your vision
-    3. **🌟 Create Magic**: Click "Create Magic!" to generate your image
-    4. **📊 See Your Power**: Get scored on how well you matched the target
-    5. **🏆 Level Up**: Earn XP, unlock achievements, and become the ultimate Prompt Princess!
+    1. **📚 Select a Challenge**: Choose from different difficulty levels and subject areas
+    2. **✍️ Write Your Prompt**: Craft a detailed description of the image you want to generate
+    3. **🚀 Generate & Analyze**: Create the image and receive similarity scoring
+    4. **📊 Review Feedback**: Learn from the detailed performance metrics
+    5. **🔄 Iterate & Improve**: Refine your prompts based on feedback and try again
     
-    ### ✨ Magical Tips for Success:
-    - 🎨 **Be Descriptive**: Use lots of colorful adjectives
-    - 🌈 **Add Magic**: Include words like 'magical', 'enchanted', 'glowing'
-    - 👗 **Describe Style**: Mention if it's 'fairy tale', 'dreamy', 'elegant'
-    - 🌸 **Set the Scene**: Describe backgrounds, lighting, and mood
-    - 💫 **Be Creative**: The more imaginative, the better!
+    ### 💡 Effective Prompt Writing Techniques:
+    - **🎨 Be Specific**: Include detailed descriptions of visual elements
+    - **🌅 Describe Lighting**: Mention time of day, light sources, and shadows
+    - **🎭 Add Style Context**: Specify artistic style, photography type, or medium
+    - **📐 Include Composition**: Describe angles, framing, and perspective
+    - **🎨 Technical Terms**: Use professional terminology when appropriate
     
     ### 🏆 Achievement System:
-    - ✨ **First Magic Spell**: Generate your first image
-    - 🌟 **Rising Star**: Score above 0.7
-    - 👑 **Prompt Princess**: Score above 0.9  
-    - 🎨 **Creative Explorer**: Make 5 attempts
-    - 🔥 **On Fire**: Get 3 good scores in a row
-    - 🏆 **Challenge Master**: Try all challenges
+    - **🎯 First Generation**: Complete your first image generation
+    - **📈 Proficient Prompter**: Achieve similarity score above 0.7
+    - **🏆 Expert Prompter**: Achieve similarity score above 0.9  
+    - **🔄 Persistent Learner**: Complete 5 prompt iterations
+    - **🎯 Consistent Performance**: Achieve 3 consecutive good scores
+    - **🌟 Challenge Completionist**: Attempt all available challenges
+    
+    ### 📊 Understanding Your Scores:
+    - **Visual Match**: How closely the generated image resembles the target visually
+    - **Semantic Similarity**: How well the meaning and content align
+    - **Structural Alignment**: How similar the composition and layout are
+    - **Color Accuracy**: How well colors match between images
+    - **Texture Quality**: How similar surface details and textures appear
     """)
 
 # Stats dashboard
@@ -708,12 +710,12 @@ if st.session_state.attempts > 0:
     with col4:
         st.metric("🔥 Best Streak", st.session_state.streak)
 
-# Footer with magical theme
+# Footer with educational theme
 st.markdown("---")
 st.markdown("""
-<div style="text-align: center; padding: 2rem; background: linear-gradient(135deg, #ffeef8 0%, #fff 100%); border-radius: 15px; border: 3px solid #ff9a9e; margin: 2rem 0;">
-    <h3>👑 ✨ Prompt Princess ✨ 👑</h3>
-    <p>Where creativity meets AI magic! 🌈</p>
-    <p><em>Become the ultimate AI artist and rule the kingdom of imagination! 🏰</em></p>
+<div class="info-card" style="text-align: center; margin: 2rem 0;">
+    <h3>🎨 AI Prompt Studio</h3>
+    <p><strong>Master the Art of AI Prompt Engineering</strong></p>
+    <p><em>Develop your creative and technical skills through interactive learning experiences</em></p>
 </div>
 """, unsafe_allow_html=True)
