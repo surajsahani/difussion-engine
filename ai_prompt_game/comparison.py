@@ -13,21 +13,17 @@ from pathlib import Path
 class ImageComparison:
     """Handles image similarity comparison using multiple metrics including LLaVA"""
     
-    def __init__(self, cache_dir="hog_cache"):
+    def __init__(self, cache_dir="hog_cache", use_llava=True):
         self.weights = {
-            'hog_features': 0.35,    
-            'structural': 0.20,      
-            'histogram': 0.15,       
-            'edges': 0.15,           
-            'colors': 0.10,          
-            'hsv_similarity': 0.05   
+            'hog_features': 0.40,    # Enhanced semantic content
+            'structural': 0.30,      # Better layout matching
+            'edges': 0.30,           # Improved shape understanding
         }
         
-        
+        self.use_llava = use_llava
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(exist_ok=True)
         self.hog_cache = {}
-        
         
         self.hog = cv2.HOGDescriptor()
         
@@ -157,45 +153,43 @@ class ImageComparison:
         
         hog_sim = self.hog_similarity(generated_image, target_image)
         structural_sim = self.structural_similarity(generated_image, target_image)
-        histogram_sim = self.histogram_similarity(generated_image, target_image)
         edge_sim = self.edge_similarity(generated_image, target_image)
-        color_sim = self.dominant_color_similarity(generated_image, target_image)
-        hsv_sim = self.hsv_similarity(generated_image, target_image)
         
         
         combined = (
             hog_sim * self.weights['hog_features'] +
             structural_sim * self.weights['structural'] +
-            histogram_sim * self.weights['histogram'] +
-            edge_sim * self.weights['edges'] +
-            color_sim * self.weights['colors'] +
-            hsv_sim * self.weights['hsv_similarity']
+            edge_sim * self.weights['edges']
         )
         
         return {
             'combined': max(0, min(1, combined)),
             'hog_features': max(0, hog_sim),
             'structural': max(0, structural_sim),
-            'histogram': max(0, histogram_sim),
-            'edges': max(0, edge_sim),
-            'colors': max(0, color_sim),
-            'hsv_similarity': max(0, hsv_sim)
+            'edges': max(0, edge_sim)
         }
     
     def structural_similarity(self, img1, img2):
-        """Calculate structural similarity using MSE"""
+        """Calculate enhanced structural similarity with multiple metrics"""
         
         gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
         gray2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
         
-        
+        # Method 1: MSE-based similarity (original)
         mse = np.mean((gray1.astype(float) - gray2.astype(float)) ** 2)
-        
-        
         max_mse = 255 * 255
-        similarity = 1 - (mse / max_mse)
+        mse_similarity = 1 - (mse / max_mse)
         
-        return similarity
+        # Method 2: Texture similarity using local binary patterns
+        texture_sim = self.texture_similarity(gray1, gray2)
+        
+        # Method 3: Composition similarity (rule of thirds, center of mass)
+        composition_sim = self.composition_similarity(gray1, gray2)
+        
+        # Combine all structural metrics
+        combined = (mse_similarity * 0.4 + texture_sim * 0.4 + composition_sim * 0.2)
+        
+        return max(0, min(1, combined))
     
     def histogram_similarity(self, img1, img2):
         """Calculate color histogram similarity"""
@@ -226,20 +220,31 @@ class ImageComparison:
         return combined
     
     def edge_similarity(self, img1, img2):
-        """Calculate edge pattern similarity"""
+        """Calculate context-aware edge similarity"""
         
         gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
         gray2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
         
-        
+        # Standard edge detection
         edges1 = cv2.Canny(gray1, 50, 150)
         edges2 = cv2.Canny(gray2, 50, 150)
         
-        
+        # Method 1: Edge pattern similarity
         edge_diff = np.mean(np.abs(edges1.astype(float) - edges2.astype(float))) / 255
-        similarity = 1 - edge_diff
+        pattern_similarity = 1 - edge_diff
         
-        return similarity
+        # Method 2: Edge density analysis (context-aware)
+        edge_density1 = np.sum(edges1 > 0) / edges1.size
+        edge_density2 = np.sum(edges2 > 0) / edges2.size
+        density_similarity = 1 - abs(edge_density1 - edge_density2)
+        
+        # Method 3: Edge orientation analysis
+        orientation_sim = self.edge_orientation_similarity(edges1, edges2)
+        
+        # Combine edge metrics with emphasis on pattern and density
+        combined = (pattern_similarity * 0.6 + density_similarity * 0.3 + orientation_sim * 0.1)
+        
+        return max(0, min(1, combined))
     
     def dominant_color_similarity(self, img1, img2):
         """Calculate dominant color similarity using k-means"""
@@ -392,6 +397,195 @@ EXPLANATION: [brief explanation]"""
             
         except Exception as e:
             return 0.5, f"Parse error: {str(e)}"
+    
+    def texture_similarity(self, gray1, gray2):
+        """Calculate texture similarity using local binary patterns"""
+        try:
+            # Simple texture analysis using gradient magnitude
+            # Calculate gradients
+            grad_x1 = cv2.Sobel(gray1, cv2.CV_64F, 1, 0, ksize=3)
+            grad_y1 = cv2.Sobel(gray1, cv2.CV_64F, 0, 1, ksize=3)
+            grad_mag1 = np.sqrt(grad_x1**2 + grad_y1**2)
+            
+            grad_x2 = cv2.Sobel(gray2, cv2.CV_64F, 1, 0, ksize=3)
+            grad_y2 = cv2.Sobel(gray2, cv2.CV_64F, 0, 1, ksize=3)
+            grad_mag2 = np.sqrt(grad_x2**2 + grad_y2**2)
+            
+            # Normalize and compare
+            grad_mag1_norm = grad_mag1 / (np.max(grad_mag1) + 1e-8)
+            grad_mag2_norm = grad_mag2 / (np.max(grad_mag2) + 1e-8)
+            
+            # Calculate correlation
+            correlation = np.corrcoef(grad_mag1_norm.flatten(), grad_mag2_norm.flatten())[0, 1]
+            return max(0, correlation) if not np.isnan(correlation) else 0.0
+            
+        except Exception:
+            return 0.5  # Fallback to neutral score
+    
+    def composition_similarity(self, gray1, gray2):
+        """Calculate composition similarity using rule of thirds and center of mass"""
+        try:
+            # Rule of thirds analysis
+            thirds1 = self.rule_of_thirds_score(gray1)
+            thirds2 = self.rule_of_thirds_score(gray2)
+            thirds_sim = 1 - abs(thirds1 - thirds2)
+            
+            # Center of mass analysis
+            com1 = self.center_of_mass(gray1)
+            com2 = self.center_of_mass(gray2)
+            com_sim = 1 - min(1, np.linalg.norm(com1 - com2) / 100)
+            
+            # Combine composition metrics
+            return (thirds_sim * 0.6 + com_sim * 0.4)
+            
+        except Exception:
+            return 0.5  # Fallback to neutral score
+    
+    def rule_of_thirds_score(self, gray_img):
+        """Calculate how well image follows rule of thirds"""
+        try:
+            h, w = gray_img.shape
+            
+            # Define rule of thirds lines
+            third_h = h // 3
+            third_w = w // 3
+            
+            # Calculate interest at intersection points
+            intersections = [
+                gray_img[third_h, third_w],
+                gray_img[third_h, 2*third_w],
+                gray_img[2*third_h, third_w],
+                gray_img[2*third_h, 2*third_w]
+            ]
+            
+            # Normalize and return average interest
+            return np.mean(intersections) / 255.0
+            
+        except Exception:
+            return 0.5
+    
+    def center_of_mass(self, gray_img):
+        """Calculate center of mass of the image"""
+        try:
+            h, w = gray_img.shape
+            y_coords, x_coords = np.mgrid[0:h, 0:w]
+            
+            # Calculate weighted center
+            total_mass = np.sum(gray_img)
+            if total_mass == 0:
+                return np.array([h/2, w/2])
+            
+            center_y = np.sum(y_coords * gray_img) / total_mass
+            center_x = np.sum(x_coords * gray_img) / total_mass
+            
+            return np.array([center_y, center_x])
+            
+        except Exception:
+            return np.array([gray_img.shape[0]/2, gray_img.shape[1]/2])
+    
+    def edge_orientation_similarity(self, edges1, edges2):
+        """Calculate edge orientation similarity"""
+        try:
+            # Calculate gradient orientation
+            grad_x1 = cv2.Sobel(edges1.astype(np.float64), cv2.CV_64F, 1, 0, ksize=3)
+            grad_y1 = cv2.Sobel(edges1.astype(np.float64), cv2.CV_64F, 0, 1, ksize=3)
+            orientation1 = np.arctan2(grad_y1, grad_x1)
+            
+            grad_x2 = cv2.Sobel(edges2.astype(np.float64), cv2.CV_64F, 1, 0, ksize=3)
+            grad_y2 = cv2.Sobel(edges2.astype(np.float64), cv2.CV_64F, 0, 1, ksize=3)
+            orientation2 = np.arctan2(grad_y2, grad_x2)
+            
+            # Calculate orientation histogram similarity
+            hist1, _ = np.histogram(orientation1.flatten(), bins=18, range=(-np.pi, np.pi))
+            hist2, _ = np.histogram(orientation2.flatten(), bins=18, range=(-np.pi, np.pi))
+            
+            # Normalize histograms
+            hist1 = hist1 / (np.sum(hist1) + 1e-8)
+            hist2 = hist2 / (np.sum(hist2) + 1e-8)
+            
+            # Calculate correlation
+            correlation = np.corrcoef(hist1, hist2)[0, 1]
+            return max(0, correlation) if not np.isnan(correlation) else 0.0
+            
+        except Exception:
+            return 0.5  # Fallback to neutral score
+    
+    def perceptual_hash_similarity(self, img1, img2):
+        """Calculate perceptual hash similarity - more reliable than histogram"""
+        try:
+            # Convert to grayscale and resize to 8x8
+            gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+            gray2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+            
+            # Resize to 8x8 for hash calculation
+            small1 = cv2.resize(gray1, (8, 8))
+            small2 = cv2.resize(gray2, (8, 8))
+            
+            # Calculate mean
+            mean1 = np.mean(small1)
+            mean2 = np.mean(small2)
+            
+            # Create hash (1 if pixel > mean, 0 otherwise)
+            hash1 = small1 > mean1
+            hash2 = small2 > mean2
+            
+            # Calculate hamming distance
+            hamming_distance = np.sum(hash1 != hash2)
+            
+            # Convert to similarity (64 is max distance for 8x8)
+            similarity = 1 - (hamming_distance / 64)
+            
+            return max(0, similarity)
+            
+        except Exception:
+            return 0.5  # Fallback to neutral score
+    
+    def sift_similarity(self, img1, img2):
+        """Calculate SIFT feature similarity for better semantic matching"""
+        try:
+            # Convert to grayscale
+            gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+            gray2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+            
+            # Initialize SIFT detector
+            sift = cv2.SIFT_create()
+            
+            # Detect keypoints and descriptors
+            kp1, des1 = sift.detectAndCompute(gray1, None)
+            kp2, des2 = sift.detectAndCompute(gray2, None)
+            
+            # If no descriptors found, return neutral score
+            if des1 is None or des2 is None:
+                return 0.5
+            
+            # Use FLANN matcher
+            FLANN_INDEX_KDTREE = 1
+            index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
+            search_params = dict(checks=50)
+            flann = cv2.FlannBasedMatcher(index_params, search_params)
+            
+            # Find matches
+            matches = flann.knnMatch(des1, des2, k=2)
+            
+            # Apply ratio test
+            good_matches = []
+            for match_pair in matches:
+                if len(match_pair) == 2:
+                    m, n = match_pair
+                    if m.distance < 0.7 * n.distance:
+                        good_matches.append(m)
+            
+            # Calculate similarity based on number of good matches
+            max_matches = min(len(kp1), len(kp2))
+            if max_matches == 0:
+                return 0.5
+            
+            similarity = len(good_matches) / max_matches
+            
+            return min(1.0, similarity)
+            
+        except Exception:
+            return 0.5  # Fallback to neutral score
     
     def explain_scores(self, scores):
         """Generate human-readable explanation of scores"""

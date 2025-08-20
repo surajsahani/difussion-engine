@@ -1,0 +1,4 @@
+[console_scripts]
+ai-game = ai_prompt_game.cli:main
+ai-prompt-game = ai_prompt_game.cli:main
+prompt-game = ai_prompt_game.cli:main

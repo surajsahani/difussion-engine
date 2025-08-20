@@ -282,12 +282,18 @@ class PromptGame:
             is_best = True
             print("🏆 NEW BEST SCORE!")
         
-        # Show results
+        # Show results with optimized metrics
         print(f"\n📊 Similarity Score: {combined_score:.3f}")
-        print(f"   - Structure: {scores['structural']:.3f}")
-        print(f"   - Colors: {scores['histogram']:.3f}")
-        print(f"   - Edges: {scores['edges']:.3f}")
-        print(f"   - Dom Colors: {scores['colors']:.3f}")
+        print(f"   - HOG Features: {scores['hog_features']:.3f} (Semantic content)")
+        print(f"   - Structure: {scores['structural']:.3f} (Layout/composition)")
+        print(f"   - Edges: {scores['edges']:.3f} (Shape boundaries)")
+        
+        # Show context focus summary
+        context_score = (scores['hog_features'] * 0.40 + 
+                        scores['structural'] * 0.30 + 
+                        scores['edges'] * 0.30)
+        print(f"\n🎯 Focus Analysis:")
+        print(f"   - Context/Content: {context_score:.3f} (100% weight)")
         
         # Show LLaVA score if available
         if 'llava_semantic' in scores and scores['llava_semantic'] > 0:
@@ -321,27 +327,51 @@ class PromptGame:
         return attempt_data
     
     def get_text_feedback(self,score,attempt_num):
-        API_URL = "https://router.huggingface.co/v1/chat/completions"
-        headers = {
-            "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
-        }
+        """Get motivational feedback with fallback for missing HF_TOKEN"""
+        try:
+            # Try to get HF_TOKEN from environment
+            hf_token = os.environ.get('HF_TOKEN')
+            if not hf_token:
+                return self.get_fallback_feedback(score, attempt_num)
+            
+            API_URL = "https://router.huggingface.co/v1/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {hf_token}",
+            }
 
-        def query(payload):
-            response = requests.post(API_URL, headers=headers, json=payload)
-            return response.json()
+            def query(payload):
+                response = requests.post(API_URL, headers=headers, json=payload)
+                return response.json()
 
-        response = query({
-            "messages": [
-                {
-                    "role": "user",
-                    "content": "You are a motivational speaker. The player has a current score of {score} and has attempted {attempt_num} times. Give them exactly 2 short, powerful, and inspiring sentences that motivate them to keep playing and give their best effort."
+            response = query({
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "You are a motivational speaker. The player has a current score of {score} and has attempted {attempt_num} times. Give them exactly 2 short, powerful, and inspiring sentences that motivate them to keep playing and give their best effort."
+                    }
+                ],
+                "model": "google/gemma-2-2b-it:nebius"
+            })
 
-                }
-            ],
-            "model": "google/gemma-2-2b-it:nebius"
-        })
-
-        return response["choices"][0]["message"]["content"]
+            return response["choices"][0]["message"]["content"]
+            
+        except Exception as e:
+            if self.verbose:
+                print(f"⚠️  AI feedback error: {e}")
+            return self.get_fallback_feedback(score, attempt_num)
+    
+    def get_fallback_feedback(self, score, attempt_num):
+        """Provide fallback motivational feedback when AI is unavailable"""
+        if score > 0.8:
+            return f"🎉 Amazing work! Your score of {score:.1%} shows you're mastering prompt engineering. Keep pushing for that perfect match!"
+        elif score > 0.6:
+            return f"🚀 Great progress! You're at {score:.1%} - you're getting the hang of this. Try adding more specific details to your prompt."
+        elif score > 0.4:
+            return f"💪 You're improving! Score: {score:.1%}. Focus on describing the composition and key elements more precisely."
+        elif score > 0.2:
+            return f"🔍 Keep trying! Your {score:.1%} score shows potential. Break down what you see into specific, descriptive terms."
+        else:
+            return f"🌟 Don't give up! Every attempt teaches you something. Try describing the overall scene and main subjects first."
 
     
     def display_target_image(self):
