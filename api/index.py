@@ -11,9 +11,10 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-# Import the Flask app
-from web_dashboard.app import app
+# Import the simplified Vercel app
+from web_dashboard.vercel_app import app
 
 # Vercel expects the app to be available as 'app'
+# This will be the WSGI application
 if __name__ == "__main__":
     app.run()
