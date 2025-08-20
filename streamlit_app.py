@@ -8,7 +8,6 @@ import requests
 import base64
 import io
 from PIL import Image
-import numpy as np
 import random
 
 # Page config
@@ -94,19 +93,27 @@ class SimpleImageGenerator:
             st.error(f"Generation error: {e}")
             return None
 
-# Simple comparison
+# Simple comparison without numpy dependency
 class SimpleComparison:
     def compare(self, img1, img2):
         try:
             if img1.size != img2.size:
                 img1 = img1.resize(img2.size)
             
-            arr1 = np.array(img1.convert('L'))
-            arr2 = np.array(img2.convert('L'))
+            # Convert to grayscale for simple comparison
+            gray1 = img1.convert('L')
+            gray2 = img2.convert('L')
             
-            diff = np.abs(arr1.astype(float) - arr2.astype(float))
-            similarity = 1.0 - (np.mean(diff) / 255.0)
+            # Simple pixel-by-pixel comparison
+            pixels1 = list(gray1.getdata())
+            pixels2 = list(gray2.getdata())
             
+            # Calculate basic similarity
+            total_pixels = len(pixels1)
+            diff_sum = sum(abs(p1 - p2) for p1, p2 in zip(pixels1, pixels2))
+            similarity = 1.0 - (diff_sum / (total_pixels * 255.0))
+            
+            # Add some randomness for demo purposes
             base_score = max(0.1, min(0.9, similarity + random.uniform(-0.2, 0.2)))
             
             return {
