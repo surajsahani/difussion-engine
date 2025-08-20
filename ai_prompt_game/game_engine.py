@@ -36,11 +36,11 @@ except ImportError:
 from .image_generator import ImageGenerator
 from .comparison import ImageComparison
 from .utils import load_target_image, save_player_stats, get_game_directory
-from dotenv import load_dotenv
-import pyttsx3
+# from dotenv import load_dotenv  # Not needed for basic functionality
+# import pyttsx3  # Not needed for basic functionality
 
 
-load_dotenv()
+# load_dotenv()  # Not needed for basic functionality
 class PromptGame:
     """Main game engine"""
     
