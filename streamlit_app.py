@@ -132,6 +132,49 @@ class SimpleComparison:
 generator = SimpleImageGenerator()
 comparator = SimpleComparison()
 
+# Pre-generated target images (base64 encoded for reliability)
+TARGET_IMAGES_B64 = {
+    'cat': None,  # Will be generated on demand
+    'coffee': None,
+    'car': None,
+    'foxes': None,
+    'llama': None,
+    'owl': None
+}
+
+def get_target_image(challenge_id):
+    """Get or generate target image for a challenge"""
+    target_prompts = {
+        'cat': 'a cute orange tabby cat sitting on a windowsill, realistic photo, soft lighting',
+        'coffee': 'a white ceramic coffee cup with steam rising, on wooden table, morning light',
+        'car': 'a red sports car on an empty road, side view, realistic automotive photography',
+        'foxes': 'two red foxes playing in autumn forest, realistic wildlife photography',
+        'llama': 'a white fluffy llama in green mountain meadow, realistic animal portrait',
+        'owl': 'a brown owl with yellow eyes perched on oak branch, realistic bird photography'
+    }
+    
+    try:
+        # Try to generate the target image
+        target_image = generator.generate(target_prompts[challenge_id])
+        if target_image:
+            return target_image
+    except Exception as e:
+        st.warning(f"Could not generate target image: {e}")
+    
+    # Fallback: create a themed placeholder
+    colors = {
+        'cat': (255, 165, 0),  # Orange
+        'coffee': (139, 69, 19),  # Brown
+        'car': (255, 0, 0),  # Red
+        'foxes': (255, 69, 0),  # Red-orange
+        'llama': (255, 255, 255),  # White
+        'owl': (139, 115, 85)  # Brown
+    }
+    
+    # Create a simple colored image with text
+    img = Image.new('RGB', (256, 256), color=colors[challenge_id])
+    return img
+
 # Header
 st.markdown("""
 <div class="main-header">
@@ -156,8 +199,11 @@ for challenge in challenges:
     if st.sidebar.button(f"{challenge['emoji']} {challenge['name']} ({challenge['difficulty']})", 
                         key=challenge['id']):
         st.session_state.current_challenge = challenge
-        # Create a simple target image (placeholder)
-        st.session_state.target_image = Image.new('RGB', (256, 256), color='lightgray')
+        
+        # Generate actual target image based on challenge
+        with st.spinner(f"Loading {challenge['name']} challenge..."):
+            st.session_state.target_image = get_target_image(challenge['id'])
+        
         st.session_state.generated_image = None
         st.session_state.scores = None
         st.rerun()
@@ -169,8 +215,12 @@ with col1:
     st.subheader("🎯 Target Image")
     if st.session_state.target_image:
         st.image(st.session_state.target_image, caption="Target to match", use_column_width=True)
+        if st.session_state.current_challenge:
+            st.caption(f"Challenge: {st.session_state.current_challenge['name']} ({st.session_state.current_challenge['difficulty']})")
     else:
         st.info("Select a challenge to see the target image")
+        if st.session_state.current_challenge:
+            st.warning(f"Selected: {st.session_state.current_challenge['name']} but no image loaded")
 
 with col2:
     st.subheader("✨ Generated Image")
