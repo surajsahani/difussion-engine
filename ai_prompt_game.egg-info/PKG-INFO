@@ -1,10 +1,10 @@
 Metadata-Version: 2.4
 Name: ai-prompt-game
-Version: 1.0.0
-Summary: AI-powered reverse prompt engineering educational game
+Version: 2.0.0
+Summary: AI-powered reverse prompt engineering educational game with advanced computer vision
 Home-page: https://github.com/yourusername/ai-prompt-game
-Author: Your Name
-Author-email: Your Name <your.email@example.com>
+Author: Suraj Sahani
+Author-email: Suraj Sahani <surajkumarsahani1997@gmail.com>
 License: MIT
 Project-URL: Homepage, https://github.com/yourusername/ai-prompt-game
 Project-URL: Repository, https://github.com/yourusername/ai-prompt-game
@@ -29,6 +29,8 @@ Requires-Dist: matplotlib>=3.5.0
 Requires-Dist: numpy>=1.21.0
 Requires-Dist: requests>=2.28.0
 Requires-Dist: pillow>=9.0.0
+Requires-Dist: scikit-image>=0.19.0
+Requires-Dist: scipy>=1.8.0
 Provides-Extra: dev
 Requires-Dist: pytest>=6.0; extra == "dev"
 Requires-Dist: black>=22.0; extra == "dev"

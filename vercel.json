@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "web_dashboard/vercel_app.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "web_dashboard/vercel_app.py"
+    }
+  ],
+  "env": {
+    "PYTHONPATH": "."
+  },
+  "functions": {
+    "web_dashboard/vercel_app.py": {
+      "maxDuration": 30
+    }
+  }
+}
