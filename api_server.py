@@ -21,7 +21,7 @@ from io import BytesIO
 from PIL import Image
 
 # Import our game logic
-from open_llm_game import OpenImageGenerator
+from ai_prompt_game.image_generator import ImageGenerator
 
 # FastAPI app
 app = FastAPI(
@@ -82,7 +82,7 @@ class ErrorResponse(BaseModel):
 
 # In-memory storage (use Redis/database in production)
 game_sessions: Dict[str, Dict] = {}
-image_generators: Dict[str, OpenImageGenerator] = {}
+image_generators: Dict[str, ImageGenerator] = {}
 
 # Helper functions
 def encode_image_to_base64(image_path: str) -> str:
@@ -176,7 +176,7 @@ async def create_game_session(
         
         # Initialize image generator
         try:
-            generator = OpenImageGenerator(model_type)
+            generator = ImageGenerator(model_type=model_type)
             image_generators[session_id] = generator
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Failed to initialize {model_type}: {str(e)}")
