@@ -5,10 +5,11 @@ Provides endpoints for CLI and web frontends
 """
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
+import requests
 import uvicorn
 import os
 import json
@@ -19,18 +20,12 @@ import numpy as np
 import base64
 from io import BytesIO
 from PIL import Image
-
+from ai_prompt_game.comparison import ImageComparison
 # Import our game logic
 from open_llm_game import OpenImageGenerator
 
 # FastAPI app
-app = FastAPI(
-    title="Prompt Guessing Game API",
-    description="AI-powered reverse prompt engineering game API",
-    version="1.0.0",
-    docs_url="/docs",  # Swagger UI
-    redoc_url="/redoc"  # ReDoc
-)
+app = FastAPI()
 
 # Enable CORS for frontend integration
 app.add_middleware(
@@ -424,8 +419,35 @@ async def list_sessions():
         })
     
     return {"sessions": sessions}
+@app.post("/game/comparison")
+async def get_comparison(
+    generated_img: UploadFile = File(...),
+    target_img: UploadFile = File(...)
+):
+    gen_bytes = await generated_img.read()
+    tar_bytes = await target_img.read()
 
-# Error handlers
+    # Convert bytes -> numpy arrays with cv2
+    gen_arr = np.frombuffer(gen_bytes, np.uint8)
+    tar_arr = np.frombuffer(tar_bytes, np.uint8)
+
+    gen_img = cv2.imdecode(gen_arr, cv2.IMREAD_COLOR)
+    tar_img = cv2.imdecode(tar_arr, cv2.IMREAD_COLOR)
+
+    comp = ImageComparison()
+    result = comp.compare(generated_image=gen_img, target_image=tar_img)
+
+    # --- 🔑 Fix: Convert any numpy values in dict to JSON-safe types ---
+    def to_serializable(val):
+        if isinstance(val, (np.floating, np.integer)):
+            return val.item()
+        if isinstance(val, np.ndarray):
+            return val.tolist()
+        return val
+
+    safe_result = {k: to_serializable(v) for k, v in result.items()}
+
+    return {"result": safe_result}
 @app.exception_handler(404)
 async def not_found_handler(request, exc):
     return JSONResponse(
