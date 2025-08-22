@@ -4,11 +4,13 @@ FastAPI REST API for Prompt Guessing Game
 Provides endpoints for CLI and web frontends
 """
 
+import io
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
+import requests
 import uvicorn
 import os
 import json
@@ -19,18 +21,12 @@ import numpy as np
 import base64
 from io import BytesIO
 from PIL import Image
-
+from ai_prompt_game.comparison import ImageComparison
 # Import our game logic
 from open_llm_game import OpenImageGenerator
 
 # FastAPI app
-app = FastAPI(
-    title="Prompt Guessing Game API",
-    description="AI-powered reverse prompt engineering game API",
-    version="1.0.0",
-    docs_url="/docs",  # Swagger UI
-    redoc_url="/redoc"  # ReDoc
-)
+app = FastAPI()
 
 # Enable CORS for frontend integration
 app.add_middleware(
@@ -425,7 +421,61 @@ async def list_sessions():
     
     return {"sessions": sessions}
 
-# Error handlers
+@app.post("/game/comparison")
+async def get_comparison(
+    target_img: UploadFile = File(...),
+    generated_img: str = Form(None),  # Change to accept Form data
+    generated_img_url: str = Form(None)  # Keep both for compatibility
+):
+    try:
+        # Use either generated_img or generated_img_url (frontend might send either)
+        img_url = generated_img or generated_img_url
+        
+        if not img_url:
+            raise HTTPException(status_code=400, detail="Generated image URL is required")
+        
+        # Fetch generated image from URL
+        response = requests.get(img_url, timeout=60)
+        response.raise_for_status()
+        
+        # Convert to OpenCV format
+        image = Image.open(io.BytesIO(response.content))
+        image_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+        print("Generated image shape:", image_cv.shape)
+        
+        # Read and process target image
+        tar_bytes = await target_img.read()
+        tar_arr = np.frombuffer(tar_bytes, np.uint8)
+        tar_img = cv2.imdecode(tar_arr, cv2.IMREAD_COLOR)
+        print("Target image shape:", tar_img.shape)
+        
+        # Check if images were decoded properly
+        if image_cv is None:
+            raise HTTPException(status_code=400, detail="Failed to decode generated image")
+        if tar_img is None:
+            raise HTTPException(status_code=400, detail="Failed to decode target image")
+        
+        # Perform comparison
+        comp = ImageComparison()
+        result = comp.compare(image_cv, tar_img)  # Pass both as OpenCV images
+
+        # Convert numpy values to JSON-safe types
+        def to_serializable(val):
+            if isinstance(val, (np.floating, np.integer)):
+                return val.item()
+            if isinstance(val, np.ndarray):
+                return val.tolist()
+            return val
+
+        safe_result = {k: to_serializable(v) for k, v in result.items()}
+
+        return {"result": safe_result}
+        
+    except requests.RequestException as e:
+        raise HTTPException(status_code=400, detail=f"Failed to fetch image from URL: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
 @app.exception_handler(404)
 async def not_found_handler(request, exc):
     return JSONResponse(
