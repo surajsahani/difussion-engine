@@ -419,6 +419,7 @@ async def list_sessions():
         })
     
     return {"sessions": sessions}
+
 @app.post("/game/comparison")
 async def get_comparison(
     generated_img: UploadFile = File(...),
