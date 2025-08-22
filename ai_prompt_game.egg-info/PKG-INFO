@@ -2,7 +2,7 @@ Metadata-Version: 2.4
 Name: ai-prompt-game
 Version: 2.0.0
 Summary: AI-powered reverse prompt engineering educational game with advanced computer vision
-Home-page: https://github.com/yourusername/ai-prompt-game
+Home-page: https://github.com/surajsahani/difussion-engine
 Author: Suraj Sahani
 Author-email: Suraj Sahani <surajkumarsahani1997@gmail.com>
 License: MIT
@@ -53,9 +53,40 @@ Dynamic: requires-python
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Cross-Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)](https://github.com/yourusername/ai-prompt-game)
 
-**Learn AI prompt engineering through reverse engineering!** 🎮
+**Master AI prompt engineering through gamified challenges!** 🎮
 
-An educational CLI game where students see a target image and must craft prompts to recreate it using AI image generation. Perfect for learning prompt engineering, visual analysis, and AI communication skills.
+An educational game with both CLI and web interfaces where students see target images and must craft prompts to recreate them using AI. Features advanced computer vision scoring, progress tracking, and beautiful gamified interface.
+
+## 🚀 Quick Start Options
+
+### Option 1: One-Click Launch (Easiest)
+```bash
+python quick_start.py
+```
+*Automatically sets up everything and opens the web dashboard*
+
+### Option 2: Web Dashboard  
+```bash
+cd web_dashboard
+python run_dashboard.py
+# Open: http://localhost:8080
+```
+
+### Option 3: Command Line Interface
+```bash
+pip install ai-prompt-game
+ai-prompt-game --setup
+ai-prompt-game --target cat
+```
+
+## ✨ What's New in v2.0
+
+- 🧠 **Revolutionary Algorithm**: 5 advanced computer vision metrics
+- 🎯 **Student Success System**: Clear passing criteria with auto-progression  
+- 🎮 **Beautiful Web Dashboard**: Modern gamified interface
+- 📊 **Progress Tracking**: Persistent progress across sessions
+- 🤖 **AI Explanations**: Detailed feedback for learning
+- 🌐 **Vercel Ready**: Deploy to cloud instantly
 
 **✅ Cross-Platform Compatible**: Works seamlessly on Windows, macOS, and Linux (Ubuntu/Debian)
 
