@@ -493,12 +493,11 @@ async def internal_error_handler(request, exc):
 if __name__ == "__main__":
     # Create necessary directories
     os.makedirs("api_sessions", exist_ok=True)
-    
+    port = int(os.environ.get("PORT", 8000))  # use Render's PORT
     # Run the server
     uvicorn.run(
         "api_server:app",
         host="0.0.0.0",
         port=8000,
-        reload=True,
         log_level="info"
     )
