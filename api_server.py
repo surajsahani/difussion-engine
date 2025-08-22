@@ -19,6 +19,7 @@ import numpy as np
 import base64
 from io import BytesIO
 from PIL import Image
+from ai_prompt_game.comparison import ImageComparison
 
 # Import our game logic
 from ai_prompt_game.image_generator import ImageGenerator
@@ -228,6 +229,30 @@ async def get_target_image_base64(session_id: str):
     
     base64_image = encode_image_to_base64(target_path)
     return {"image_base64": base64_image, "format": "jpeg"}
+
+@app.post("/game/comparison")
+async def get_comparison(
+    generated_img: UploadFile = File(...),
+    target_img: UploadFile = File(...)
+):
+    gen_bytes = await generated_img.read()
+    tar_bytes = await target_img.read()
+    # Convert bytes -> numpy arrays with cv2
+    gen_arr = np.frombuffer(gen_bytes, np.uint8)
+    tar_arr = np.frombuffer(tar_bytes, np.uint8)
+    gen_img = cv2.imdecode(gen_arr, cv2.IMREAD_COLOR)
+    tar_img = cv2.imdecode(tar_arr, cv2.IMREAD_COLOR)
+    comp = ImageComparison()
+    result = comp.compare(generated_image=gen_img, target_image=tar_img)
+    # --- :key: Fix: Convert any numpy values in dict to JSON-safe types ---
+    def to_serializable(val):
+        if isinstance(val, (np.floating, np.integer)):
+            return val.item()
+        if isinstance(val, np.ndarray):
+            return val.tolist()
+        return val
+    safe_result = {k: to_serializable(v) for k, v in result.items()}
+    return {"result": safe_result}
 
 @app.post("/game/attempt", response_model=AttemptResult)
 async def make_attempt(request: PromptRequest):
