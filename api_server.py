@@ -4,6 +4,7 @@ FastAPI REST API for Prompt Guessing Game
 Provides endpoints for CLI and web frontends
 """
 
+import io
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -422,33 +423,59 @@ async def list_sessions():
 
 @app.post("/game/comparison")
 async def get_comparison(
-    generated_img: UploadFile = File(...),
-    target_img: UploadFile = File(...)
+    target_img: UploadFile = File(...),
+    generated_img: str = Form(None),  # Change to accept Form data
+    generated_img_url: str = Form(None)  # Keep both for compatibility
 ):
-    gen_bytes = await generated_img.read()
-    tar_bytes = await target_img.read()
+    try:
+        # Use either generated_img or generated_img_url (frontend might send either)
+        img_url = generated_img or generated_img_url
+        
+        if not img_url:
+            raise HTTPException(status_code=400, detail="Generated image URL is required")
+        
+        # Fetch generated image from URL
+        response = requests.get(img_url, timeout=60)
+        response.raise_for_status()
+        
+        # Convert to OpenCV format
+        image = Image.open(io.BytesIO(response.content))
+        image_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+        print("Generated image shape:", image_cv.shape)
+        
+        # Read and process target image
+        tar_bytes = await target_img.read()
+        tar_arr = np.frombuffer(tar_bytes, np.uint8)
+        tar_img = cv2.imdecode(tar_arr, cv2.IMREAD_COLOR)
+        print("Target image shape:", tar_img.shape)
+        
+        # Check if images were decoded properly
+        if image_cv is None:
+            raise HTTPException(status_code=400, detail="Failed to decode generated image")
+        if tar_img is None:
+            raise HTTPException(status_code=400, detail="Failed to decode target image")
+        
+        # Perform comparison
+        comp = ImageComparison()
+        result = comp.compare(image_cv, tar_img)  # Pass both as OpenCV images
 
-    # Convert bytes -> numpy arrays with cv2
-    gen_arr = np.frombuffer(gen_bytes, np.uint8)
-    tar_arr = np.frombuffer(tar_bytes, np.uint8)
+        # Convert numpy values to JSON-safe types
+        def to_serializable(val):
+            if isinstance(val, (np.floating, np.integer)):
+                return val.item()
+            if isinstance(val, np.ndarray):
+                return val.tolist()
+            return val
 
-    gen_img = cv2.imdecode(gen_arr, cv2.IMREAD_COLOR)
-    tar_img = cv2.imdecode(tar_arr, cv2.IMREAD_COLOR)
+        safe_result = {k: to_serializable(v) for k, v in result.items()}
 
-    comp = ImageComparison()
-    result = comp.compare(generated_image=gen_img, target_image=tar_img)
+        return {"result": safe_result}
+        
+    except requests.RequestException as e:
+        raise HTTPException(status_code=400, detail=f"Failed to fetch image from URL: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-    # --- 🔑 Fix: Convert any numpy values in dict to JSON-safe types ---
-    def to_serializable(val):
-        if isinstance(val, (np.floating, np.integer)):
-            return val.item()
-        if isinstance(val, np.ndarray):
-            return val.tolist()
-        return val
-
-    safe_result = {k: to_serializable(v) for k, v in result.items()}
-
-    return {"result": safe_result}
 @app.exception_handler(404)
 async def not_found_handler(request, exc):
     return JSONResponse(
