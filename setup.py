@@ -19,9 +19,9 @@ def read_requirements():
 
 setup(
     name="ai-prompt-game",
-    version="1.0.0",
-    author="Your Name",
-    author_email="your.email@example.com",
+    version="2.0.0",
+    author="Suraj Sahani",
+    author_email="surajkumarsahani1997@gmail.com",
     description="Cross-platform AI-powered reverse prompt engineering educational game for Windows, macOS, and Linux",
     long_description=read_readme(),
     long_description_content_type="text/markdown",

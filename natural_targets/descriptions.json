@@ -1,12 +1,12 @@
 {
-  "mountain_sunset.jpg": {
+  "foxes.png": {
     "difficulty": "Medium",
     "key_elements": [
-      "mountains",
-      "sunset",
-      "golden light",
+      "Fox",
+      "dramatic heart",
+      "trees",
       "dramatic clouds",
-      "silhouette"
+      "knot"
     ],
     "style_hints": [
       "landscape photography",
@@ -14,57 +14,56 @@
       "dramatic lighting"
     ],
     "sample_prompts": [
-      "golden sunset over mountain peaks",
-      "dramatic mountain silhouette at sunset",
-      "golden hour landscape with mountains and clouds"
+      "Two Foxes on tree, cartoon",
+      "Foxes on tree with know on legs",
+      "Cartoon foxes"
     ]
   },
-  "ocean_waves.jpg": {
+  "llama.jpg": {
     "difficulty": "Hard",
     "key_elements": [
-      "ocean",
-      "waves",
-      "rocks",
-      "spray",
-      "motion"
+      "Sheep",
+      "Umbrella",
+      "Snow",
+      "Scarf",
+      "Brown Background"
     ],
     "style_hints": [
-      "seascape",
-      "dynamic water",
-      "coastal photography"
+      "landscape",
+      "cartoon"
     ],
     "sample_prompts": [
-      "powerful ocean waves crashing on rocks",
-      "dramatic seascape with white foam",
-      "coastal waves with spray and motion"
+      "A sheep with an umbrella",
+      "A sheep in snow with an umbrella",
+      "A cartoon image of a sheep in snow with an umbrella"
     ]
   },
-  "forest_path.jpg": {
+  "owl.png": {
     "difficulty": "Medium",
     "key_elements": [
       "forest",
-      "path",
+      "cartoon",
       "trees",
       "mist",
       "green"
     ],
     "style_hints": [
-      "nature photography",
+      "cartoon",
       "atmospheric",
       "peaceful"
     ],
     "sample_prompts": [
-      "misty forest path through tall trees",
-      "peaceful woodland trail with soft light",
-      "atmospheric forest scene with morning mist"
+      "A owl between trees",
+      "A owl with moon behind",
+      "atmospheric forest scene with owl"
     ]
   },
-  "desert_dunes.jpg": {
+  "van.jpg": {
     "difficulty": "Easy",
     "key_elements": [
-      "sand dunes",
-      "desert",
-      "shadows",
+      "van",
+      "beach",
+      "mountains",
       "blue sky"
     ],
     "style_hints": [
@@ -73,29 +72,29 @@
       "warm colors"
     ],
     "sample_prompts": [
-      "rolling sand dunes with dramatic shadows",
-      "desert landscape with golden sand",
-      "minimalist dune photography"
+      "A blue van",
+      "A blue van riding near ocean",
+      "A blue van climbing mountain"
     ]
   },
-  "tropical_beach.jpg": {
-    "difficulty": "Easy",
+  "car.png": {
+    "difficulty": "Hard",
     "key_elements": [
-      "beach",
-      "tropical",
-      "clear water",
-      "white sand",
-      "paradise"
+      "Bear",
+      "car",
+      "illustration" ,
+      "Cute",
+      "Toy"
     ],
     "style_hints": [
-      "tropical",
-      "crystal clear",
-      "pristine"
+      "Minimal",
+      "Retro",
+      "Flat"
     ],
     "sample_prompts": [
-      "tropical beach with crystal clear water",
-      "pristine white sand beach paradise",
-      "turquoise water and white sand"
+      "Cute bear driving a toy car illustration",
+      "Retro flat design cartoon vehicle with animal driver",
+      "Minimal playful vector art of bear in car"
     ]
   }
 }

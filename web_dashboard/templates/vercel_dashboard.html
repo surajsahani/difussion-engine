@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 AI Prompt Game v2.0 - Live Demo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .demo-notice {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .demo-notice h3 {
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+
+        .game-area {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .challenge-selector {
+            margin-bottom: 30px;
+        }
+
+        .challenge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .challenge-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 15px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .challenge-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .challenge-card.active {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            transform: scale(1.05);
+        }
+
+        .challenge-emoji {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .challenge-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .challenge-difficulty {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .image-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .image-container {
+            text-align: center;
+        }
+
+        .image-container h3 {
+            margin-bottom: 15px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .image-frame {
+            width: 100%;
+            height: 300px;
+            border: 3px dashed #ddd;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-frame img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .image-placeholder {
+            color: #999;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .prompt-section {
+            margin-bottom: 30px;
+        }
+
+        .prompt-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.3s ease;
+        }
+
+        .prompt-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results-section {
+            display: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .main-score {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .score-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .detailed-scores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .score-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .score-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .score-name {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        .ai-feedback {
+            margin-top: 20px;
+        }
+
+        .feedback-item {
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .passing-indicator {
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .passing-indicator.passed {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+        }
+
+        .passing-indicator.not-passed {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa8a8 100%);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .image-comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            .challenge-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 AI Prompt Game v2.0</h1>
+            <p>Master AI prompt engineering through gamified challenges</p>
+        </div>
+
+        <div class="demo-notice">
+            <h3>🌐 Live Demo Version</h3>
+            <p>This is a simplified version running on Vercel. Try generating images with creative prompts!</p>
+            <p><strong>Tip:</strong> Be specific about colors, objects, and style for better results.</p>
+        </div>
+
+        <div class="game-area">
+            <div class="challenge-selector">
+                <h3><i class="fas fa-trophy"></i> Choose Your Challenge</h3>
+                <div class="challenge-grid" id="challengeGrid">
+                    <!-- Challenges will be loaded here -->
+                </div>
+            </div>
+
+            <div class="image-comparison">
+                <div class="image-container">
+                    <h3><i class="fas fa-bullseye"></i> Target Image</h3>
+                    <div class="image-frame" id="targetImageFrame">
+                        <div class="image-placeholder">
+                            <i class="fas fa-image fa-3x"></i><br>
+                            Select a challenge to begin
+                        </div>
+                    </div>
+                </div>
+                <div class="image-container">
+                    <h3><i class="fas fa-magic"></i> Generated Image</h3>
+                    <div class="image-frame" id="generatedImageFrame">
+                        <div class="image-placeholder">
+                            <i class="fas fa-wand-magic-sparkles fa-3x"></i><br>
+                            Enter a prompt to generate
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="prompt-section">
+                <h3><i class="fas fa-keyboard"></i> Your Prompt</h3>
+                <textarea 
+                    id="promptInput" 
+                    class="prompt-input" 
+                    placeholder="Describe the image you want to create... Be creative and detailed!"
+                    disabled
+                ></textarea>
+                <button id="generateBtn" class="generate-btn" disabled>
+                    <i class="fas fa-rocket"></i> Generate & Compare
+                </button>
+            </div>
+
+            <div class="loading" id="loadingIndicator">
+                <div class="spinner"></div>
+                <p>Generating your image and analyzing similarity...</p>
+            </div>
+
+            <div class="results-section" id="resultsSection">
+                <div class="main-score" id="mainScore">0.000</div>
+                <div class="score-label">Similarity Score</div>
+                <div class="detailed-scores" id="detailedScores">
+                    <!-- Detailed scores will be shown here -->
+                </div>
+                <div class="ai-feedback" id="aiFeedback">
+                    <!-- AI feedback will be shown here -->
+                </div>
+                <div class="passing-indicator" id="passingIndicator">
+                    <!-- Passing status will be shown here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentChallenge = null;
+
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadChallenges();
+        });
+
+        async function loadChallenges() {
+            try {
+                const response = await fetch('/api/targets');
+                const targets = await response.json();
+                
+                const grid = document.getElementById('challengeGrid');
+                grid.innerHTML = '';
+                
+                targets.forEach(target => {
+                    const card = document.createElement('button');
+                    card.className = 'challenge-card';
+                    card.onclick = () => selectChallenge(target);
+                    
+                    card.innerHTML = `
+                        <div class="challenge-emoji">${target.emoji}</div>
+                        <div class="challenge-name">${target.name}</div>
+                        <div class="challenge-difficulty">${target.difficulty}</div>
+                    `;
+                    
+                    grid.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Failed to load challenges:', error);
+            }
+        }
+
+        async function selectChallenge(target) {
+            try {
+                // Update UI
+                document.querySelectorAll('.challenge-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                event.target.closest('.challenge-card').classList.add('active');
+                
+                // Start challenge
+                const response = await fetch('/api/start_challenge', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ target_id: target.id })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentChallenge = target;
+                    
+                    // Show target image
+                    const targetFrame = document.getElementById('targetImageFrame');
+                    targetFrame.innerHTML = `<img src="${result.target_image}" alt="Target Image">`;
+                    
+                    // Enable prompt input
+                    document.getElementById('promptInput').disabled = false;
+                    document.getElementById('generateBtn').disabled = false;
+                    
+                    // Reset generated image
+                    const generatedFrame = document.getElementById('generatedImageFrame');
+                    generatedFrame.innerHTML = `
+                        <div class="image-placeholder">
+                            <i class="fas fa-wand-magic-sparkles fa-3x"></i><br>
+                            Enter a prompt to generate
+                        </div>
+                    `;
+                    
+                    // Hide results
+                    document.getElementById('resultsSection').style.display = 'none';
+                    
+                } else {
+                    alert('Failed to start challenge: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Failed to select challenge:', error);
+                alert('Failed to start challenge. Please try again.');
+            }
+        }
+
+        async function generateImage() {
+            const prompt = document.getElementById('promptInput').value.trim();
+            
+            if (!prompt) {
+                alert('Please enter a prompt first!');
+                return;
+            }
+            
+            if (!currentChallenge) {
+                alert('Please select a challenge first!');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loadingIndicator').classList.add('show');
+            document.getElementById('generateBtn').disabled = true;
+            document.getElementById('resultsSection').style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Show generated image
+                    const generatedFrame = document.getElementById('generatedImageFrame');
+                    generatedFrame.innerHTML = `<img src="${result.generated_image}" alt="Generated Image">`;
+                    
+                    // Show results
+                    displayResults(result);
+                    
+                } else {
+                    alert('Failed to generate image: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Failed to generate image:', error);
+                alert('Failed to generate image. Please try again.');
+            } finally {
+                // Hide loading
+                document.getElementById('loadingIndicator').classList.remove('show');
+                document.getElementById('generateBtn').disabled = false;
+            }
+        }
+
+        function displayResults(result) {
+            const scores = result.scores;
+            const explanations = result.explanations;
+            const passingResult = result.passing_result;
+            
+            // Main score
+            document.getElementById('mainScore').textContent = scores.combined.toFixed(3);
+            
+            // Detailed scores
+            const detailedScores = document.getElementById('detailedScores');
+            detailedScores.innerHTML = `
+                <div class="score-item">
+                    <div class="score-value">${scores.perceptual.toFixed(3)}</div>
+                    <div class="score-name">Perceptual</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-value">${scores.semantic.toFixed(3)}</div>
+                    <div class="score-name">Semantic</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-value">${scores.structural.toFixed(3)}</div>
+                    <div class="score-name">Structural</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-value">${scores.color_advanced.toFixed(3)}</div>
+                    <div class="score-name">Color</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-value">${scores.texture.toFixed(3)}</div>
+                    <div class="score-name">Texture</div>
+                </div>
+            `;
+            
+            // AI feedback
+            const aiFeedback = document.getElementById('aiFeedback');
+            aiFeedback.innerHTML = explanations.map(explanation => 
+                `<div class="feedback-item">${explanation}</div>`
+            ).join('');
+            
+            // Passing indicator
+            const passingIndicator = document.getElementById('passingIndicator');
+            if (passingResult.passed) {
+                passingIndicator.className = 'passing-indicator passed';
+                passingIndicator.innerHTML = `
+                    <i class="fas fa-trophy"></i> ${passingResult.message}
+                `;
+            } else {
+                passingIndicator.className = 'passing-indicator not-passed';
+                passingIndicator.innerHTML = `
+                    <i class="fas fa-target"></i> ${passingResult.message}
+                `;
+            }
+            
+            // Show results section
+            document.getElementById('resultsSection').style.display = 'block';
+        }
+
+        // Event listeners
+        document.getElementById('generateBtn').addEventListener('click', generateImage);
+        
+        document.getElementById('promptInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                generateImage();
+            }
+        });
+    </script>
+</body>
+</html>
