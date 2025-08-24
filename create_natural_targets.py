@@ -39,7 +39,7 @@ def create_natural_targets():
     """Create a collection of natural target images"""
     
     # Create targets directory
-    os.makedirs("natural_targets", exist_ok=True)
+    os.makedirs("natural_target", exist_ok=True)
     
     print("🌟 Creating Natural Target Image Collection")
     print("=" * 50)
@@ -101,7 +101,7 @@ def create_natural_targets():
     successful_downloads = 0
     
     for target in targets:
-        filename = f"natural_targets/{target['name']}"
+        filename = f"natural_target/{target['name']}"
         
         if download_image(target['url'], filename):
             successful_downloads += 1
@@ -111,7 +111,7 @@ def create_natural_targets():
     
     print("=" * 50)
     print(f"🎯 Successfully created {successful_downloads}/{len(targets)} target images")
-    print("📁 Images saved in: natural_targets/")
+    print("📁 Images saved in: natural_target/")
     
     return successful_downloads > 0
 
@@ -173,10 +173,10 @@ def create_challenge_descriptions():
     
     # Save descriptions as JSON
     import json
-    with open("natural_targets/descriptions.json", "w") as f:
+    with open("natural_target/descriptions.json", "w") as f:
         json.dump(descriptions, f, indent=2)
     
-    print("📋 Challenge descriptions saved to: natural_targets/descriptions.json")
+    print("📋 Challenge descriptions saved to: natural_target/descriptions.json")
 
 def test_with_pollinations():
     """Test generating images with Pollinations.ai using natural targets"""
@@ -215,7 +215,7 @@ def test_with_pollinations():
             
             if response.status_code == 200:
                 # Save generated image
-                output_file = f"natural_targets/test_generated_{i}.jpg"
+                output_file = f"natural_target/test_generated_{i}.jpg"
                 with open(output_file, 'wb') as f:
                     f.write(response.content)
                 print(f"✅ Generated image saved: {output_file}")
@@ -246,11 +246,11 @@ def main():
         print("\n🎉 Setup complete!")
         print("\n🎮 To use these targets:")
         print("python open_llm_game.py")
-        print("# Then enter: natural_targets/mountain_sunset.jpg")
+        print("# Then enter: natural_target/mountain_sunset.jpg")
         
         print("\n🌐 Or with the API:")
         print("python api_server.py")
-        print("# Upload any image from natural_targets/ folder")
+        print("# Upload any image from natural_target/ folder")
         
     else:
         print("❌ Failed to create natural targets")
